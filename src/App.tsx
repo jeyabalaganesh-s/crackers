@@ -16,6 +16,8 @@ import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminOrders from "./pages/admin/AdminOrders";
+import ProtectedAdminRoute from "./components/admin/ProtectedAdminRoute";
+
 
 function StoreLayout() {
   return (
@@ -40,23 +42,69 @@ function StoreLayout() {
   );
 }
 
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Admin login without customer layout or sidebar */}
-        <Route path="/admin/login" element={<AdminLogin />} />
 
-        {/* Admin pages with their own sidebar */}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<AdminDashboard />} />
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="products" element={<AdminProducts />} />
-          <Route path="orders" element={<AdminOrders />} />
+        {/* ================================================= */}
+        {/* ADMIN LOGIN */}
+        {/* ================================================= */}
+
+        <Route
+          path="/admin/login"
+          element={<AdminLogin />}
+        />
+
+
+        {/* ================================================= */}
+        {/* PROTECTED ADMIN AREA */}
+        {/* ================================================= */}
+
+        <Route element={<ProtectedAdminRoute />}>
+
+          <Route
+            path="/admin"
+            element={<AdminLayout />}
+          >
+            {/* /admin */}
+            <Route
+              index
+              element={<AdminDashboard />}
+            />
+
+            {/* /admin/dashboard */}
+            <Route
+              path="dashboard"
+              element={<AdminDashboard />}
+            />
+
+            {/* /admin/products */}
+            <Route
+              path="products"
+              element={<AdminProducts />}
+            />
+
+            {/* /admin/orders */}
+            <Route
+              path="orders"
+              element={<AdminOrders />}
+            />
+          </Route>
+
         </Route>
 
-        {/* Customer website */}
-        <Route path="/*" element={<StoreLayout />} />
+
+        {/* ================================================= */}
+        {/* CUSTOMER WEBSITE */}
+        {/* ================================================= */}
+
+        <Route
+          path="/*"
+          element={<StoreLayout />}
+        />
+
       </Routes>
     </BrowserRouter>
   );

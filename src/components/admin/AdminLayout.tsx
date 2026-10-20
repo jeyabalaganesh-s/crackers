@@ -7,6 +7,7 @@ import {
   Store,
   PanelLeftClose,
   PanelLeft,
+  Flame,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -39,32 +40,66 @@ export default function AdminLayout() {
 
   return (
     <div className="flex min-h-screen bg-[#fffaf2] text-[#251714]">
-      {/* Sidebar */}
+
+      {/* ================================================= */}
+      {/* SIDEBAR */}
+      {/* ================================================= */}
+
       <aside
         className={`sticky top-0 flex h-screen shrink-0 flex-col bg-[#4a1018] text-white transition-all duration-300 ${
           collapsed ? "w-[76px]" : "w-64"
         }`}
       >
+
+        {/* Sidebar Header */}
         <div className="flex h-20 items-center justify-between gap-2 border-b border-white/10 px-4">
+
           <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10">
-              <Store size={22} />
+
+            {/* Shiva Logo */}
+            <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl bg-yellow-400 text-black shadow-sm">
+              <span className="text-[7px] leading-none">
+                ♛
+              </span>
+
+              <span className="text-[12px] font-black leading-none">
+                SHIVA
+              </span>
+
+              <span className="text-[5px] font-extrabold leading-none">
+                FIRE WORKS
+              </span>
+
+              <span className="mt-0.5 h-[2px] w-7 bg-red-600" />
             </div>
 
             {!collapsed && (
               <div className="min-w-0">
                 <h1 className="truncate font-black tracking-wide">
-                  SHIVA <span className="text-yellow-400">FIRE WORKS</span>
+                  SHIVA{" "}
+                  <span className="text-yellow-400">
+                    FIRE WORKS
+                  </span>
                 </h1>
-                <p className="text-xs text-white/60">Admin Portal</p>
+
+                <p className="text-xs text-white/60">
+                  Admin Portal
+                </p>
               </div>
             )}
           </div>
 
+          {/* Collapse */}
           <button
             type="button"
-            onClick={() => setCollapsed((value) => !value)}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            onClick={() =>
+              setCollapsed((value) => !value)
+            }
+            aria-label={
+              collapsed
+                ? "Expand sidebar"
+                : "Collapse sidebar"
+            }
             className="hidden rounded-lg p-2 text-white/70 hover:bg-white/10 hover:text-white lg:block"
           >
             {collapsed ? (
@@ -75,7 +110,13 @@ export default function AdminLayout() {
           </button>
         </div>
 
+
+        {/* ================================================= */}
+        {/* NAVIGATION */}
+        {/* ================================================= */}
+
         <nav className="flex-1 space-y-2 overflow-y-auto px-3 py-6">
+
           {!collapsed && (
             <p className="mb-4 px-3 text-xs font-bold uppercase tracking-widest text-white/40">
               Workspace
@@ -89,7 +130,11 @@ export default function AdminLayout() {
               <NavLink
                 key={item.path}
                 to={item.path}
-                title={collapsed ? item.label : undefined}
+                title={
+                  collapsed
+                    ? item.label
+                    : undefined
+                }
                 className={({ isActive }) =>
                   `flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition ${
                     isActive
@@ -98,53 +143,110 @@ export default function AdminLayout() {
                   }`
                 }
               >
-                <Icon size={20} className="shrink-0" />
-                {!collapsed && <span>{item.label}</span>}
+                <Icon
+                  size={20}
+                  className="shrink-0"
+                />
+
+                {!collapsed && (
+                  <span>{item.label}</span>
+                )}
               </NavLink>
             );
           })}
         </nav>
 
+
+        {/* ================================================= */}
+        {/* BOTTOM ACTIONS */}
+        {/* ================================================= */}
+
         <div className="border-t border-white/10 p-3">
+
+          {/* View Store */}
           <NavLink
             to="/"
-            title={collapsed ? "View Store" : undefined}
-            className="mb-2 flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-white/75 hover:bg-white/10 hover:text-white"
+            title={
+              collapsed
+                ? "View Store"
+                : undefined
+            }
+            className="mb-2 flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-white/75 transition hover:bg-white/10 hover:text-white"
           >
-            <Store size={20} className="shrink-0" />
-            {!collapsed && <span>View Store</span>}
+            <Store
+              size={20}
+              className="shrink-0"
+            />
+
+            {!collapsed && (
+              <span>View Store</span>
+            )}
           </NavLink>
 
+
+          {/* Logout */}
           <button
             type="button"
             onClick={handleLogout}
-            title={collapsed ? "Logout" : undefined}
+            title={
+              collapsed
+                ? "Logout"
+                : undefined
+            }
             className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-white/75 transition hover:bg-red-500/20 hover:text-white"
           >
-            <LogOut size={20} className="shrink-0" />
-            {!collapsed && <span>Logout</span>}
+            <LogOut
+              size={20}
+              className="shrink-0"
+            />
+
+            {!collapsed && (
+              <span>Logout</span>
+            )}
           </button>
         </div>
       </aside>
 
-      {/* Main admin content */}
+
+      {/* ================================================= */}
+      {/* MAIN ADMIN CONTENT */}
+      {/* ================================================= */}
+
       <div className="min-w-0 flex-1">
+
+        {/* Top Header */}
         <header className="sticky top-0 z-10 flex h-20 items-center justify-between border-b border-[#eadfce] bg-white/95 px-5 backdrop-blur sm:px-8">
+
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-             Shiva Fire Works
+              Shiva Fire Works
             </p>
-            <h2 className="text-lg font-black">Administration</h2>
+
+            <h2 className="text-lg font-black">
+              Administration
+            </h2>
           </div>
 
-          <span className="rounded-full border border-[#eadfce] bg-[#fffaf2] px-3 py-2 text-xs font-bold text-[#4a1018]">
-            Admin Panel
-          </span>
+          <div className="flex items-center gap-3">
+
+            <span className="hidden items-center gap-2 rounded-full border border-[#eadfce] bg-[#fffaf2] px-3 py-2 text-xs font-bold text-[#4a1018] sm:flex">
+              <Flame size={14} />
+              Shiva Fire Works
+            </span>
+
+            <span className="rounded-full border border-[#eadfce] bg-[#fffaf2] px-3 py-2 text-xs font-bold text-[#4a1018]">
+              Admin Panel
+            </span>
+
+          </div>
         </header>
 
+
+        {/* Page Content */}
         <main className="p-5 sm:p-8">
           <Outlet />
         </main>
+
       </div>
     </div>
   );
