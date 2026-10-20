@@ -43,7 +43,7 @@ export default function AdminLogin() {
       }
 
       // Store the authentication token for subsequent admin API requests.
-      sessionStorage.setItem("raja_admin_token", data.token);
+      sessionStorage.setItem("shiva_admin_token", data.token);
 
       navigate("/admin/dashboard", { replace: true });
     } catch (err) {
@@ -79,9 +79,9 @@ export default function AdminLogin() {
             </p>
 
             <h1 className="mt-3 text-4xl font-black leading-tight sm:text-5xl">
-              Raja
+                Shiva 
               <br />
-              Agencies
+                Fire Works
             </h1>
 
             <p className="mt-5 max-w-sm text-sm leading-7 text-white/75 sm:text-base">

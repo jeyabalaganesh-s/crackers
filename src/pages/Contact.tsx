@@ -141,7 +141,7 @@ export default function Contact() {
               title="Visit Us"
               description="Find our business location."
               detail="Sivakasi, Tamil Nadu"
-              href="https://www.google.com/maps/search/?api=1&query=Raja+Agencies+Sivakasi"
+              href="https://www.google.com/maps/search/?api=1&query=Shiva+Fire+Works+Sivakasi"
               linkText="View map"
             />
           </div>

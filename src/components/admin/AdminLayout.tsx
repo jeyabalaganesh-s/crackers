@@ -16,7 +16,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
 
   function handleLogout() {
-    sessionStorage.removeItem("raja_admin_token");
+    sessionStorage.removeItem("shiva_admin_token");
     navigate("/admin/login", { replace: true });
   }
 

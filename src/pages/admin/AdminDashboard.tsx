@@ -86,7 +86,7 @@ export default function AdminDashboard() {
     }
 
     try {
-      const token = sessionStorage.getItem("raja_admin_token");
+      const token = sessionStorage.getItem("shiva_admin_token");
 
       const headers: HeadersInit = token
         ? { Authorization: `Bearer ${token}` }

@@ -153,8 +153,8 @@ export default function About() {
 
             <div className="mt-6 space-y-4 text-base leading-8 text-gray-600">
               <p>
-                Celebrations bring families and communities together. At Raja
-                Agencies, our goal is to make exploring fireworks and asking
+                Celebrations bring families and communities together. At Shiva 
+                Fire Works, our goal is to make exploring fireworks and asking
                 about products a simple, convenient experience.
               </p>
               <p>

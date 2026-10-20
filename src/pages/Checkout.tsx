@@ -218,7 +218,7 @@ function downloadOrderPDF(order: OrderPDFDetails) {
   pdf.text(disclaimerLines, margin, summaryY);
 
   // Automatically download the PDF.
-  pdf.save(`Raja-Agencies-${order.orderNumber}.pdf`);
+  pdf.save(`Shiva-Fire-Works-${order.orderNumber}.pdf`);
 }
 
 export default function Checkout() {

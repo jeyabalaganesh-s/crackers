@@ -169,7 +169,7 @@ export default function Home() {
                   href="#about"
                   className="inline-flex items-center gap-3 border border-white/30 px-5 py-4 text-xs font-bold tracking-wider text-white transition hover:bg-white/10"
                 >
-                  DISCOVER RAJA
+                  DISCOVER SHIVA FIRE WORKS
                 </a>
               </div>
 
@@ -212,7 +212,7 @@ export default function Home() {
 
                 <div className="flex min-h-60 flex-col items-center justify-center border-4 border-yellow-400 bg-[radial-gradient(circle_at_center,#ffb43c,#df4c27_45%,#671321)] px-4 py-6 text-center text-yellow-50 shadow-inner sm:min-h-72">
                   <span className="text-xs font-bold tracking-[5px]">
-                    RAJA
+                    SHIVA FIRE WORKS
                   </span>
 
                   <div className="my-4 grid h-24 w-24 place-items-center rounded-full border border-yellow-200/70 bg-red-950/20">
@@ -563,10 +563,10 @@ export default function Home() {
           <div className="mx-auto flex min-h-64 w-full max-w-xs rotate-[-2deg] flex-col items-center justify-center bg-yellow-300 p-8 text-center shadow-[10px_10px_0_#eee0c4]">
             <Sparkles size={43} className="mb-4 text-red-900" />
             <span className="text-3xl font-black tracking-wider">
-              RAJA
+              SHIVA
             </span>
             <span className="text-2xl font-black tracking-[4px]">
-              AGENCIES
+              FIRE WORKS
             </span>
             <span className="mt-4 text-[10px] font-bold tracking-[3px] text-red-900">
               SIVAKASI

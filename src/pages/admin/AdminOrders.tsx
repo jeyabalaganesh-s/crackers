@@ -126,7 +126,7 @@ export default function AdminOrders() {
 
     try {
       const token =
-        sessionStorage.getItem("raja_admin_token");
+        sessionStorage.getItem("shiva_admin_token");
 
       const response = await fetch(
         `${API_BASE_URL}/api/orders`,
@@ -194,7 +194,7 @@ export default function AdminOrders() {
 
     try {
       const token =
-        sessionStorage.getItem("raja_admin_token");
+        sessionStorage.getItem("shiva_admin_token");
 
       const response = await fetch(
         `${API_BASE_URL}/api/orders/${order._id}/status`,

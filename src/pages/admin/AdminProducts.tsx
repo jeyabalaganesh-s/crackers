@@ -116,7 +116,7 @@ export default function AdminProducts() {
   // Headers
   // ----------------------------------------
   const getHeaders = () => {
-    const token = sessionStorage.getItem("raja_admin_token");
+    const token = sessionStorage.getItem("shiva_admin_token");
 
     return {
       "Content-Type": "application/json",
@@ -137,7 +137,7 @@ export default function AdminProducts() {
     setError("");
 
     try {
-      const token = sessionStorage.getItem("raja_admin_token");
+      const token = sessionStorage.getItem("shiva_admin_token");
 
       if (!token) {
         throw new Error(
@@ -171,7 +171,7 @@ export default function AdminProducts() {
 
       if (!response.ok) {
         if (response.status === 401) {
-          sessionStorage.removeItem("raja_admin_token");
+          sessionStorage.removeItem("shiva_admin_token");
 
           throw new Error(
             data.message ||
