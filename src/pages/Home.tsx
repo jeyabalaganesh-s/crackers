@@ -151,7 +151,7 @@ export default function Home() {
               </p>
 
               <p className="mt-4 max-w-lg text-sm leading-7 text-rose-100/80 sm:text-base">
-                Discover the Raja Agencies catalogue and explore a range of
+                Discover the Shiva Fire Works catalogue and explore a range of
                 festive fireworks for your celebrations. Browse products,
                 submit an enquiry, and let our team help you with your order.
               </p>
@@ -542,7 +542,7 @@ export default function Home() {
 
             <p className="mt-5 max-w-xl text-sm leading-7 text-rose-100/80">
               Visit the product catalogue, select the items you are interested
-              in, and send your enquiry to Raja Agencies.
+              in, and send your enquiry to Shiva Fire Works.
             </p>
           </div>
 
@@ -575,7 +575,7 @@ export default function Home() {
 
           <div>
             <p className="text-[10px] font-extrabold tracking-[3px] text-amber-800">
-              ABOUT RAJA AGENCIES
+              ABOUT SHIVA FIRE WORKS
             </p>
 
             <h2 className="mt-3 text-3xl font-black leading-tight tracking-tight sm:text-4xl">
@@ -585,7 +585,7 @@ export default function Home() {
             </h2>
 
             <p className="mt-5 text-sm leading-7 text-stone-600">
-              Raja Agencies provides an online catalogue experience for
+              Shiva Fire Works provides an online catalogue experience for
               customers looking to explore fireworks from Sivakasi. Browse
               product categories, select items, and send your enquiry from
               the comfort of your home.

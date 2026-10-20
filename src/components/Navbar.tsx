@@ -28,10 +28,6 @@ export default function Navbar() {
             PRODUCTS
           </NavLink>
 
-          <NavLink to="/enquiry" className={linkClass}>
-            ENQUIRY
-          </NavLink>
-
           <NavLink to="/contact" className={linkClass}>
             CONTACT
           </NavLink>

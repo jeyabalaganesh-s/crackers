@@ -42,7 +42,7 @@ export default function NotFound() {
           </div>
 
           <p className="text-sm font-extrabold uppercase tracking-[0.3em] text-[#a36d1c]">
-            Raja Agencies · Sivakasi
+           Shiva Fire Works · Sivakasi
           </p>
 
           <h1 className="mt-5 text-7xl font-black tracking-tight text-[#4a1018] sm:text-9xl">

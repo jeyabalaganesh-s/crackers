@@ -215,7 +215,7 @@ export default function AdminLogin() {
 
             <div className="my-7 flex items-center gap-3">
               <div className="h-px flex-1 bg-[#eadfce]" />
-              <span className="text-xs text-gray-400">RAJA AGENCIES</span>
+              <span className="text-xs text-gray-400">SHIVA FIRE WORKS</span>
               <div className="h-px flex-1 bg-[#eadfce]" />
             </div>
 

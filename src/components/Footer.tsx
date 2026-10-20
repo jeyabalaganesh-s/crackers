@@ -13,12 +13,12 @@ export default function Footer() {
               ♛
             </span>
             <span className="text-xl font-black tracking-wide">
-              RAJA <span className="text-yellow-400">AGENCIES</span>
+              SHIVA <span className="text-yellow-400">FIRE WORKS</span>
             </span>
           </Link>
 
           <p className="mt-5 max-w-sm text-sm leading-7 text-stone-400">
-            Explore the festive catalogue from Raja Agencies, Sivakasi.
+            Explore the festive catalogue from Shiva Fire Works, Sivakasi.
             Contact our team for product information and enquiries.
           </p>
 
@@ -37,31 +37,25 @@ export default function Footer() {
           </p>
 
           <a
-            href="tel:+919629193963"
+            href="tel:+918438042315"
             className="mb-3 flex items-center gap-3 text-sm text-stone-300 transition hover:text-yellow-300"
           >
             <Phone size={16} />
-            +91 96291 93963
+            +91 84380 42315
           </a>
 
-          <a
-            href="tel:+919361079772"
-            className="mb-6 flex items-center gap-3 text-sm text-stone-300 transition hover:text-yellow-300"
-          >
-            <Phone size={16} />
-            +91 93610 79772
-          </a>
+
 
           <p className="mb-3 text-[10px] font-bold tracking-widest text-yellow-300">
             EMAIL
           </p>
 
           <a
-            href="mailto:paulsamy.raja53@gmail.com"
+            href="mailto:nareshdigitalnd@gmail.com"
             className="flex items-center gap-2 break-all text-sm text-stone-300 transition hover:text-yellow-300"
           >
             <Mail size={16} />
-            paulsamy.raja53@gmail.com
+            nareshdigitalnd@gmail.com
           </a>
         </div>
 
@@ -77,7 +71,7 @@ export default function Footer() {
               to="/#about"
               className="transition hover:text-yellow-300"
             >
-              About Raja Agencies
+              About Shiva Fire Works
             </Link>
             <Link
               to="/products"
@@ -107,7 +101,7 @@ export default function Footer() {
           <MapPin size={25} className="mb-4 text-yellow-400" />
 
           <p className="text-sm leading-7 text-stone-400">
-            Raja Agencies
+            Shiva Fire Works
             <br />
             M. Meenakshipuram
             <br />
@@ -117,7 +111,7 @@ export default function Footer() {
           </p>
 
           <a
-            href="https://www.google.com/maps/search/?api=1&query=Raja+Agencies+Crackers+Sivakasi"
+            href="https://www.google.com/maps/search/?api=1&query=Shiva+Fire+Works+Crackers+Sivakasi"
             target="_blank"
             rel="noreferrer"
             className="mt-5 inline-flex items-center gap-2 border border-yellow-400/40 px-4 py-3 text-[10px] font-bold tracking-wider text-yellow-300 transition hover:bg-yellow-400 hover:text-black"
@@ -141,10 +135,27 @@ export default function Footer() {
       </div>
 
       {/* Copyright */}
-      <div className="flex flex-col gap-3 px-6 py-5 text-[10px] text-stone-500 sm:flex-row sm:items-center sm:justify-between sm:px-10 lg:px-[7%]">
-        <p>© {new Date().getFullYear()} Raja Agencies. All rights reserved.</p>
-        <p className="tracking-widest">MADE FOR CELEBRATIONS · SIVAKASI</p>
-      </div>
+<div className="flex flex-col gap-3 px-6 py-5 text-[10px] text-stone-500 sm:flex-row sm:items-center sm:justify-between sm:px-10 lg:px-[7%]">
+  <p>
+    © {new Date().getFullYear()} Shiva Fire Works. All rights reserved.
+  </p>
+
+  <p className="tracking-widest">
+    MADE FOR CELEBRATIONS · SIVAKASI
+  </p>
+
+  <p>
+    Crafted by{" "}
+    <a
+      href="https://jeyabalaganesh.site"
+      target="_blank"
+      rel="noreferrer"
+      className="font-semibold text-yellow-400 transition hover:text-yellow-300"
+    >
+      Jeyabalaganesh
+    </a>
+  </p>
+</div>
     </footer>
   );
 }

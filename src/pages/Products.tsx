@@ -332,7 +332,21 @@ export default function Products() {
 
     setNotice(`${product.name} added to your cart.`);
   }
+function getProductImageUrl(image?: string) {
+  if (!image) {
+    return "";
+  }
 
+  // Already a complete URL
+  if (/^https?:\/\//i.test(image)) {
+    return image;
+  }
+
+  // Remove accidental leading slash
+  const cleanImage = image.replace(/^\/+/, "");
+
+  return `${API_BASE_URL}/product-images/${encodeURIComponent(cleanImage)}`;
+}
   function isInCart(productId: string) {
     return cartItems.some((item) => item.id === productId);
   }
@@ -347,7 +361,7 @@ export default function Products() {
         <div className="relative mx-auto max-w-7xl">
           <div className="mb-5 flex items-center gap-2 text-sm font-semibold text-[#f8c54d]">
             <Flame size={17} />
-            RAJA AGENCIES · SIVAKASI
+            SHIVA FIRE WORKS · SIVAKASI
           </div>
 
           <h1 className="max-w-3xl text-4xl font-black leading-tight sm:text-5xl lg:text-6xl">
@@ -541,44 +555,56 @@ export default function Products() {
                     className="group overflow-hidden rounded-2xl border border-[#eee3d4] bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl"
                   >
                     {/* Product image */}
-                    <div className="relative flex h-52 items-center justify-center overflow-hidden bg-gradient-to-br from-[#fff0d4] via-[#fff8ee] to-[#f5dfd0]">
-                      {product.image ? (
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          loading="lazy"
-                          className="h-full w-full object-contain p-3 transition duration-300 group-hover:scale-105"
-                          onError={(event) => {
-                            event.currentTarget.style.display = "none";
-                          }}
-                        />
-                      ) : (
-                        <span
-                          className="select-none text-7xl transition duration-300 group-hover:scale-110"
-                          role="img"
-                          aria-label={product.category}
-                        >
-                          {product.emoji}
-                        </span>
-                      )}
+<div className="relative flex h-52 items-center justify-center overflow-hidden bg-gradient-to-br from-[#fff0d4] via-[#fff8ee] to-[#f5dfd0]">
+  {product.image ? (
+    <img
+      src={getProductImageUrl(product.image)}
+      alt={product.name}
+      loading="lazy"
+      className="h-full w-full object-contain p-3 transition duration-300 group-hover:scale-105"
+      onError={(event) => {
+        event.currentTarget.style.display = "none";
 
-                      {product.badge && !soldOut && (
-                        <span className="absolute left-4 top-4 rounded-full bg-[#4a1018] px-3 py-1.5 text-xs font-bold text-white">
-                          {product.badge}
-                        </span>
-                      )}
+        const fallback = event.currentTarget
+          .parentElement
+          ?.querySelector(".product-image-fallback");
 
-                      {soldOut && (
-                        <span className="absolute left-4 top-4 rounded-full bg-gray-800 px-3 py-1.5 text-xs font-bold text-white">
-                          Sold Out
-                        </span>
-                      )}
+        if (fallback instanceof HTMLElement) {
+          fallback.classList.remove("hidden");
+        }
+      }}
+    />
+  ) : null}
 
-                      <div className="absolute bottom-3 right-3 rounded-full bg-white/90 p-2 text-[#4a1018]">
-                        <Sparkles size={18} />
-                      </div>
-                    </div>
+  {/* Fallback when image is missing or fails */}
+  <span
+    className={`product-image-fallback select-none text-7xl transition duration-300 group-hover:scale-110 ${
+      product.image ? "hidden" : ""
+    }`}
+    role="img"
+    aria-label={product.category}
+  >
+    {product.emoji}
+  </span>
 
+  {product.badge && !soldOut && (
+    <span className="absolute left-4 top-4 rounded-full bg-[#4a1018] px-3 py-1.5 text-xs font-bold text-white">
+      {product.badge}
+    </span>
+  )}
+
+  {soldOut && (
+    <span className="absolute left-4 top-4 rounded-full bg-gray-800 px-3 py-1.5 text-xs font-bold text-white">
+      Sold Out
+    </span>
+  )}
+
+  <div className="absolute bottom-3 right-3 rounded-full bg-white/90 p-2 text-[#4a1018]">
+    <Sparkles size={18} />
+  </div>
+</div>
+    
+    
                     {/* Product details */}
                     <div className="p-5">
                       <p className="text-xs font-bold uppercase tracking-widest text-[#a36d1c]">

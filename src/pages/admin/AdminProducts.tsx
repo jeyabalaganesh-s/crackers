@@ -480,7 +480,7 @@ export default function AdminProducts() {
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <p className="text-sm font-semibold uppercase tracking-widest text-red-800">
-              Raja Agencies
+              SHIVA FIRE WORKS
             </p>
 
             <h1 className="mt-1 text-3xl font-bold text-stone-900">

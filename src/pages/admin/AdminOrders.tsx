@@ -384,7 +384,7 @@ export default function AdminOrders() {
 <body>
 
   <div class="brand">
-    Raja Agencies
+    Shiva Fire Works · Sivakasi
   </div>
 
   <h1>
@@ -539,7 +539,7 @@ export default function AdminOrders() {
 
           <div>
             <p className="text-sm font-semibold uppercase tracking-widest text-red-800">
-              Raja Agencies
+              Shiva Fire Works
             </p>
 
             <h1 className="mt-1 text-3xl font-bold text-stone-900">

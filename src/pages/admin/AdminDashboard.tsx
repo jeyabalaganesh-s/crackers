@@ -482,7 +482,7 @@ export default function AdminDashboard() {
       </section>
 
       <p className="pb-2 text-center text-xs text-gray-400">
-        Raja Agencies · Store Administration
+        Shiva Fire Works · Store Administration
       </p>
     </div>
   );

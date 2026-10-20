@@ -10,6 +10,7 @@ import {
   ArrowRight,
   MessageCircle,
 } from "lucide-react";
+import { useEffect } from "react";
 
 const values = [
   {
@@ -60,6 +61,9 @@ const steps = [
 ];
 
 export default function About() {
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
   return (
     <div className="min-h-screen bg-[#fffaf4] text-gray-900">
 
@@ -71,7 +75,7 @@ export default function About() {
         <div className="relative mx-auto max-w-7xl">
           <p className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-[0.25em] text-orange-400">
             <Sparkles size={17} />
-            About Raja Agencies
+            About Shiva Fire Works
           </p>
 
           <h1 className="max-w-4xl text-4xl font-black leading-tight sm:text-6xl">
@@ -82,7 +86,7 @@ export default function About() {
           </h1>
 
           <p className="mt-6 max-w-2xl text-base leading-8 text-gray-300 sm:text-lg">
-            Based in Sivakasi, Tamil Nadu, Raja Agencies is building a
+            Based in Sivakasi, Tamil Nadu, Shiva Fire Works is building a
             convenient way for customers to explore fireworks, ask questions,
             and enquire about products for their celebrations.
           </p>
@@ -114,7 +118,7 @@ export default function About() {
                   <Sparkles size={48} />
                 </div>
                 <p className="mt-6 text-3xl font-black text-gray-900">
-                  Raja Agencies
+                  Shiva Fire Works
                 </p>
                 <p className="mt-2 font-medium text-gray-600">
                   Your celebration, your way.
@@ -192,7 +196,7 @@ export default function About() {
               The Values Behind Our Service
             </h2>
             <p className="mt-4 leading-7 text-gray-600">
-              We want every interaction with Raja Agencies to feel clear,
+              We want every interaction with Shiva Fire Works to feel clear,
               helpful, and responsible.
             </p>
           </div>
@@ -286,7 +290,7 @@ export default function About() {
             Let's Make Your Celebration Special
           </h2>
           <p className="mx-auto mt-4 max-w-2xl leading-7 text-gray-700">
-            Explore our catalogue or contact Raja Agencies to enquire about
+            Explore our catalogue or contact Shiva Fire Works to enquire about
             products, prices, and availability.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">

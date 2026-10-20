@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 
-const WHATSAPP_NUMBER = "91XXXXXXXXXX"; // Replace with your WhatsApp number
+const WHATSAPP_NUMBER = "918438042315"; // Replace with your WhatsApp number
 
 export default function Contact() {
   const [form, setForm] = useState({
@@ -40,7 +40,7 @@ export default function Contact() {
     }
 
     const message = [
-      "Hello Raja Agencies!",
+      "Hello Shiva Fire Works!",
       "",
       `Name: ${form.name}`,
       `Phone: ${form.phone}`,
@@ -78,7 +78,7 @@ export default function Contact() {
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hello Raja Agencies! I have a product enquiry.")}`}
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hello Shiva Fire Works! I have a product enquiry.")}`}
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-2 rounded-xl bg-green-500 px-5 py-3 font-bold text-white transition hover:bg-green-600"
@@ -117,7 +117,7 @@ export default function Contact() {
               title="Call Us"
               description="Speak with our team directly."
               detail="Add your business phone"
-              href="tel:+910000000000"
+              href="tel:+918438042315"
               linkText="Call now"
             />
             <ContactCard
@@ -133,7 +133,7 @@ export default function Contact() {
               title="Email Us"
               description="Send us your questions."
               detail="Add your business email"
-              href="mailto:yourbusiness@example.com"
+              href="mailto:nareshdigitalnd@gmail.com"
               linkText="Send email"
             />
             <ContactCard
@@ -273,7 +273,7 @@ export default function Contact() {
                 availability before visiting.
               </p>
               <div className="mt-6 border-t border-white/10 pt-5">
-                <p className="font-semibold">Raja Agencies</p>
+                <p className="font-semibold">Shiva Fire Works</p>
                 <p className="mt-1 text-sm text-gray-400">
                   Sivakasi, Tamil Nadu, India
                 </p>
@@ -297,7 +297,7 @@ export default function Contact() {
             </div>
 
             <a
-              href="https://www.google.com/maps/search/?api=1&query=Raja+Agencies+Sivakasi"
+              href="https://www.google.com/maps/search/?api=1&query=Shiva+Fire+Works+Sivakasi"
               target="_blank"
               rel="noreferrer"
               className="flex items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-white p-5 transition hover:border-orange-300"

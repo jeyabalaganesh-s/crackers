@@ -64,7 +64,7 @@ function downloadOrderPDF(order: OrderPDFDetails) {
   pdf.setTextColor(255, 255, 255);
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(21);
-  pdf.text("RAJA AGENCIES", margin, 18);
+  pdf.text("SHIVA FIRE WORKS", margin, 18);
 
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(11);
@@ -199,7 +199,7 @@ function downloadOrderPDF(order: OrderPDFDetails) {
   const disclaimer =
     "This document is an order enquiry summary, not a tax invoice or payment receipt. " +
     "Product availability, final prices, delivery charges and order confirmation " +
-    "must be verified by Raja Agencies. No online payment has been taken.";
+    "must be verified by Shiva Fire Works. No online payment has been taken.";
 
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(8);
@@ -373,7 +373,7 @@ export default function Checkout() {
           </h1>
 
           <p className="mt-3 text-gray-600">
-            Thank you for choosing Raja Agencies. Your order summary PDF
+            Thank you for choosing Shiva Fire Works. Your order summary PDF
             should download automatically. We will contact you to confirm
             availability and final order details.
           </p>
@@ -447,7 +447,7 @@ export default function Checkout() {
         </h1>
 
         <p className="mt-2 text-gray-600">
-          Enter your details so Raja Agencies can contact you about your order.
+          Enter your details so Shiva Fire Works can contact you about your order.
         </p>
 
         {error && (
@@ -694,7 +694,7 @@ export default function Checkout() {
 
             <p className="mt-3 text-xs leading-5 text-gray-500">
               Delivery charges or other applicable costs, if any, must be
-              confirmed by Raja Agencies.
+              confirmed by Shiva Fire Works.
             </p>
           </aside>
         </div>

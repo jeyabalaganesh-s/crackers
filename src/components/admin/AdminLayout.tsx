@@ -54,7 +54,7 @@ export default function AdminLayout() {
             {!collapsed && (
               <div className="min-w-0">
                 <h1 className="truncate font-black tracking-wide">
-                  RAJA AGENCIES
+                  SHIVA <span className="text-yellow-400">FIRE WORKS</span>
                 </h1>
                 <p className="text-xs text-white/60">Admin Portal</p>
               </div>
@@ -132,7 +132,7 @@ export default function AdminLayout() {
         <header className="sticky top-0 z-10 flex h-20 items-center justify-between border-b border-[#eadfce] bg-white/95 px-5 backdrop-blur sm:px-8">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-              Raja Agencies
+             Shiva Fire Works
             </p>
             <h2 className="text-lg font-black">Administration</h2>
           </div>
