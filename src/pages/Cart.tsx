@@ -179,7 +179,7 @@ export default function Cart() {
                 >
                   {minimumOrderMet
                     ? "Minimum order requirement met"
-                    : "Minimum order: ₹3,000"}
+                    : "Minimum order: ₹2,500"}
                 </p>
 
                 {minimumOrderMet ? (
