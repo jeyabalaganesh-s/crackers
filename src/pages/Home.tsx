@@ -14,7 +14,20 @@ import {
   Phone,
 
 } from "lucide-react";
-import { useEffect } from "react";
+
+import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+const heroImages = [
+  {
+    src: "/shiva-fireworks-banner.jpeg",
+    alt: "Shiva Fire Works - Sivakasi",
+  },
+  {
+    src: "/shiva-fireworks-banner-2.jpeg",
+    alt: "Shiva Fire Works - Festive Fireworks Collection",
+  },
+];
 
 
 const categories = [
@@ -115,6 +128,26 @@ const benefits = [
 
 export default function Home() {
 
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+   // Automatically change images every 4 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((current) => (current + 1) % heroImages.length);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const previousSlide = () => {
+    setCurrentSlide(
+      (current) => (current - 1 + heroImages.length) % heroImages.length
+    );
+  };
+
+  const nextSlide = () => {
+    setCurrentSlide((current) => (current + 1) % heroImages.length);
+  };
     
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -124,8 +157,65 @@ export default function Home() {
     <div className="min-h-screen overflow-hidden bg-[#fffdf8] font-sans text-stone-900">
 
       <main>
+
+           {/* HERO CAROUSEL */}
+      <section className="group relative w-full overflow-hidden bg-red-700">
+        {/* Images */}
+        {heroImages.map((image, index) => (
+          <img
+            key={image.src}
+            src={image.src}
+            alt={image.alt}
+            fetchPriority={index === 0 ? "high" : "auto"}
+            className={`absolute inset-0 h-full w-full object-contain transition-opacity duration-700 ${
+              currentSlide === index
+                ? "relative opacity-100"
+                : "opacity-0"
+            }`}
+          />
+        ))}
+
+        {/* Previous button */}
+        <button
+          type="button"
+          onClick={previousSlide}
+          aria-label="Previous banner"
+          className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white opacity-100 transition hover:bg-black/75 sm:left-5 sm:p-3"
+        >
+          <ChevronLeft size={24} />
+        </button>
+
+        {/* Next button */}
+        <button
+          type="button"
+          onClick={nextSlide}
+          aria-label="Next banner"
+          className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white opacity-100 transition hover:bg-black/75 sm:right-5 sm:p-3"
+        >
+          <ChevronRight size={24} />
+        </button>
+
+        {/* Slide indicators */}
+        <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-2 sm:bottom-5">
+          {heroImages.map((image, index) => (
+            <button
+              key={image.src}
+              type="button"
+              onClick={() => setCurrentSlide(index)}
+              aria-label={`Go to banner ${index + 1}`}
+              aria-current={currentSlide === index ? "true" : undefined}
+              className={`h-2.5 rounded-full transition-all ${
+                currentSlide === index
+                  ? "w-8 bg-white"
+                  : "w-2.5 bg-white/60 hover:bg-white"
+              }`}
+            />
+          ))}
+        </div>
+      </section>
         {/* HERO */}
         <section className="relative isolate overflow-hidden bg-[#300d19] text-white">
+    
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_75%_45%,rgba(181,75,45,0.45),transparent_42%),linear-gradient(110deg,#300d19,#45121f_55%,#1d111c)]" />
 
           <div className="absolute inset-0 -z-10 opacity-20 [background-image:radial-gradient(#f7b843_1px,transparent_1px)] [background-size:24px_24px]" />

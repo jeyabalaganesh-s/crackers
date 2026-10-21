@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -151,6 +150,51 @@ export default function Products() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+
+  const [selectedImage, setSelectedImage] = useState<{
+  url: string;
+  name: string;
+} | null>(null);
+
+  // Store the selected quantity separately for each product.
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
+
+  function getQuantity(productId: string) {
+    return quantities[productId] ?? 1;
+  }
+
+  function decreaseQuantity(productId: string) {
+    setQuantities((current) => ({
+      ...current,
+      [productId]: Math.max(1, (current[productId] ?? 1) - 1),
+    }));
+  }
+
+  function increaseQuantity(productId: string) {
+    setQuantities((current) => ({
+      ...current,
+      [productId]: Math.min(999, (current[productId] ?? 1) + 1),
+    }));
+  }
+
+  function handleQuantityInput(productId: string, value: string) {
+    if (value === "") {
+      setQuantities((current) => ({
+        ...current,
+        [productId]: 1,
+      }));
+      return;
+    }
+
+    const parsedValue = Number.parseInt(value, 10);
+
+    if (!Number.isNaN(parsedValue)) {
+      setQuantities((current) => ({
+        ...current,
+        [productId]: Math.min(999, Math.max(1, parsedValue)),
+      }));
+    }
+  }
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -316,37 +360,47 @@ export default function Products() {
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  // Add the selected quantity to the cart.
   function addProductToCart(product: Product) {
     if (product.stockStatus === "sold_out" || !product.id) {
       return;
     }
 
-    addToCart({
-      id: product.id,
-      name: product.name,
-      category: product.category,
-      price: product.price,
-      image: product.image,
-      content: product.content,
-    });
+    const quantity = getQuantity(product.id);
 
-    setNotice(`${product.name} added to your cart.`);
-  }
-function getProductImageUrl(image?: string) {
-  if (!image) {
-    return "";
-  }
+    addToCart(
+      {
+        id: product.id,
+        name: product.name,
+        category: product.category,
+        price: product.price,
+        image: product.image,
+        content: product.content,
+      },
+      quantity
+    );
 
-  // Already a complete URL
-  if (/^https?:\/\//i.test(image)) {
-    return image;
+    setNotice(
+      `${quantity} × ${product.name} added to your cart.`
+    );
   }
 
-  // Remove accidental leading slash
-  const cleanImage = image.replace(/^\/+/, "");
+  function getProductImageUrl(image?: string) {
+    if (!image) {
+      return "";
+    }
 
-  return `${API_BASE_URL}/product-images/${encodeURIComponent(cleanImage)}`;
-}
+    // Already a complete URL.
+    if (/^https?:\/\//i.test(image)) {
+      return image;
+    }
+
+    // Remove accidental leading slash.
+    const cleanImage = image.replace(/^\/+/, "");
+
+    return `${API_BASE_URL}/product-images/${encodeURIComponent(cleanImage)}`;
+  }
+
   function isInCart(productId: string) {
     return cartItems.some((item) => item.id === productId);
   }
@@ -543,11 +597,12 @@ function getProductImageUrl(image?: string) {
           </div>
         ) : filteredProducts.length > 0 ? (
           <>
-            {/* Product grid: render only the current page */}
+            {/* Product grid */}
             <div className="mt-7 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {paginatedProducts.map((product) => {
                 const soldOut = product.stockStatus === "sold_out";
                 const added = isInCart(product.id);
+                const quantity = getQuantity(product.id);
 
                 return (
                   <article
@@ -555,8 +610,19 @@ function getProductImageUrl(image?: string) {
                     className="group overflow-hidden rounded-2xl border border-[#eee3d4] bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl"
                   >
                     {/* Product image */}
-<div className="relative flex h-52 items-center justify-center overflow-hidden bg-gradient-to-br from-[#fff0d4] via-[#fff8ee] to-[#f5dfd0]">
-  {product.image ? (
+                    <div className="relative flex h-52 items-center justify-center overflow-hidden bg-gradient-to-br from-[#fff0d4] via-[#fff8ee] to-[#f5dfd0]">
+{product.image ? (
+  <button
+    type="button"
+    onClick={() =>
+      setSelectedImage({
+        url: getProductImageUrl(product.image),
+        name: product.name,
+      })
+    }
+    aria-label={`View larger image of ${product.name}`}
+    className="h-full w-full cursor-zoom-in"
+  >
     <img
       src={getProductImageUrl(product.image)}
       alt={product.name}
@@ -566,7 +632,7 @@ function getProductImageUrl(image?: string) {
         event.currentTarget.style.display = "none";
 
         const fallback = event.currentTarget
-          .parentElement
+          .parentElement?.parentElement
           ?.querySelector(".product-image-fallback");
 
         if (fallback instanceof HTMLElement) {
@@ -574,37 +640,37 @@ function getProductImageUrl(image?: string) {
         }
       }}
     />
-  ) : null}
+  </button>
+) : null}
 
-  {/* Fallback when image is missing or fails */}
-  <span
-    className={`product-image-fallback select-none text-7xl transition duration-300 group-hover:scale-110 ${
-      product.image ? "hidden" : ""
-    }`}
-    role="img"
-    aria-label={product.category}
-  >
-    {product.emoji}
-  </span>
+                      {/* Fallback when image is missing or fails */}
+                      <span
+                        className={`product-image-fallback select-none text-7xl transition duration-300 group-hover:scale-110 ${
+                          product.image ? "hidden" : ""
+                        }`}
+                        role="img"
+                        aria-label={product.category}
+                      >
+                        {product.emoji}
+                      </span>
 
-  {product.badge && !soldOut && (
-    <span className="absolute left-4 top-4 rounded-full bg-[#4a1018] px-3 py-1.5 text-xs font-bold text-white">
-      {product.badge}
-    </span>
-  )}
+                      {product.badge && !soldOut && (
+                        <span className="absolute left-4 top-4 rounded-full bg-[#4a1018] px-3 py-1.5 text-xs font-bold text-white">
+                          {product.badge}
+                        </span>
+                      )}
 
-  {soldOut && (
-    <span className="absolute left-4 top-4 rounded-full bg-gray-800 px-3 py-1.5 text-xs font-bold text-white">
-      Sold Out
-    </span>
-  )}
+                      {soldOut && (
+                        <span className="absolute left-4 top-4 rounded-full bg-gray-800 px-3 py-1.5 text-xs font-bold text-white">
+                          Sold Out
+                        </span>
+                      )}
 
-  <div className="absolute bottom-3 right-3 rounded-full bg-white/90 p-2 text-[#4a1018]">
-    <Sparkles size={18} />
-  </div>
-</div>
-    
-    
+                      <div className="absolute bottom-3 right-3 rounded-full bg-white/90 p-2 text-[#4a1018]">
+                        <Sparkles size={18} />
+                      </div>
+                    </div>
+
                     {/* Product details */}
                     <div className="p-5">
                       <p className="text-xs font-bold uppercase tracking-widest text-[#a36d1c]">
@@ -625,6 +691,58 @@ function getProductImageUrl(image?: string) {
                         {product.description}
                       </p>
 
+                      {/* Quantity selector */}
+                      {!soldOut && (
+                        <div className="mt-4">
+                          <label
+                            htmlFor={`quantity-${product.id}`}
+                            className="mb-2 block text-xs font-bold text-gray-600"
+                          >
+                            Quantity
+                          </label>
+
+                          <div className="flex w-fit items-center overflow-hidden rounded-xl border border-[#eadfce] bg-white">
+                            <button
+                              type="button"
+                              onClick={() => decreaseQuantity(product.id)}
+                              disabled={quantity <= 1}
+                              aria-label={`Decrease quantity for ${product.name}`}
+                              className="flex h-10 w-10 items-center justify-center text-lg font-bold text-[#4a1018] transition hover:bg-[#f8e8cb] disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                              −
+                            </button>
+
+                            <input
+  id={`quantity-${product.id}`}
+  type="number"
+  min={1}
+  max={999}
+  step={1}
+  value={quantity}
+  onChange={(event) =>
+    handleQuantityInput(product.id, event.target.value)
+  }
+  onWheel={(event) => {
+    event.currentTarget.blur();
+  }}
+  aria-label={`Quantity for ${product.name}`}
+  className="h-10 w-14 border-x border-[#eadfce] text-center text-sm font-bold outline-none"
+/>
+
+                            <button
+                              type="button"
+                              onClick={() => increaseQuantity(product.id)}
+                              disabled={quantity >= 999}
+                              aria-label={`Increase quantity for ${product.name}`}
+                              className="flex h-10 w-10 items-center justify-center text-lg font-bold text-[#4a1018] transition hover:bg-[#f8e8cb] disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Price and Add to Cart */}
                       <div className="mt-5 flex items-center justify-between gap-3 border-t border-[#f0e7dc] pt-4">
                         <div className="min-w-0">
                           <p className="text-xs text-gray-500">
@@ -636,9 +754,15 @@ function getProductImageUrl(image?: string) {
                               Sold Out
                             </p>
                           ) : (
-                            <p className="mt-1 text-sm font-extrabold text-[#4a1018]">
-                              {formatPrice(product.price)}
-                            </p>
+                            <>
+                              <p className="mt-1 text-sm font-extrabold text-[#4a1018]">
+                                {formatPrice(product.price)}
+                              </p>
+
+                              <p className="mt-1 text-xs text-gray-500">
+                                Total: {formatPrice(product.price * quantity)}
+                              </p>
+                            </>
                           )}
                         </div>
 
@@ -810,6 +934,46 @@ function getProductImageUrl(image?: string) {
           </Link>
         </div>
       </section>
+
+      {/* Full-size product image preview */}
+{selectedImage && (
+  <div
+    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+    onClick={() => setSelectedImage(null)}
+    role="presentation"
+  >
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Image preview: ${selectedImage.name}`}
+      className="relative w-full max-w-3xl rounded-2xl bg-white p-3 shadow-2xl sm:p-5"
+      onClick={(event) => event.stopPropagation()}
+    >
+      <button
+        type="button"
+        onClick={() => setSelectedImage(null)}
+        aria-label="Close image preview"
+        className="absolute right-3 top-3 z-10 rounded-full bg-white p-2 text-gray-800 shadow-md transition hover:bg-gray-100"
+      >
+        <X size={22} />
+      </button>
+
+      <img
+        src={selectedImage.url}
+        alt={selectedImage.name}
+        className="max-h-[75vh] w-full rounded-xl object-contain"
+      />
+
+      <h3 className="mt-3 text-center text-lg font-bold text-[#4a1018]">
+        {selectedImage.name}
+      </h3>
+
+      <p className="mt-1 text-center text-xs text-gray-500">
+        Click outside the image or press the close button to return.
+      </p>
+    </div>
+  </div>
+)}
     </main>
   );
 }
