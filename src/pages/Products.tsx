@@ -109,7 +109,7 @@ function getCategoryEmoji(category: string) {
 
 function toProduct(item: ApiProduct): Product {
   return {
-    id: item._id ?? "",
+    id: item._id ?? item.id ?? "",
     name: item.name,
     category: getCategoryLabel(item.category),
     description:
@@ -140,7 +140,13 @@ function formatPrice(price: number) {
 }
 
 export default function Products() {
-  const { addToCart, items: cartItems, cartCount } = useCart();
+  const {
+    addToCart,
+    updateQuantity,
+    removeFromCart,
+    items: cartItems,
+    cartCount,
+  } = useCart();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [activeCategory, setActiveCategory] = useState("All Products");
@@ -152,48 +158,95 @@ export default function Products() {
   const [notice, setNotice] = useState("");
 
   const [selectedImage, setSelectedImage] = useState<{
-  url: string;
-  name: string;
-} | null>(null);
+    url: string;
+    name: string;
+  } | null>(null);
 
-  // Store the selected quantity separately for each product.
+  // Each product starts at quantity 0.
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
   function getQuantity(productId: string) {
-    return quantities[productId] ?? 1;
+    // If the product is already in the cart, show its actual cart quantity.
+    const cartItem = cartItems.find((item) => item.id === productId);
+
+    if (cartItem) {
+      return cartItem.quantity;
+    }
+
+    return quantities[productId] ?? 0;
+  }
+
+  function isInCart(productId: string) {
+    return cartItems.some((item) => item.id === productId);
+  }
+
+  // Synchronize quantity changes with the cart if the product was added.
+  function syncCartQuantity(productId: string, quantity: number) {
+    if (!isInCart(productId)) {
+      return;
+    }
+
+    if (quantity <= 0) {
+      removeFromCart(productId);
+
+      setQuantities((current) => ({
+        ...current,
+        [productId]: 0,
+      }));
+
+      return;
+    }
+
+    updateQuantity(productId, quantity);
   }
 
   function decreaseQuantity(productId: string) {
+    const nextQuantity = Math.max(0, getQuantity(productId) - 1);
+
     setQuantities((current) => ({
       ...current,
-      [productId]: Math.max(1, (current[productId] ?? 1) - 1),
+      [productId]: nextQuantity,
     }));
+
+    syncCartQuantity(productId, nextQuantity);
   }
 
   function increaseQuantity(productId: string) {
+    const nextQuantity = Math.min(999, getQuantity(productId) + 1);
+
     setQuantities((current) => ({
       ...current,
-      [productId]: Math.min(999, (current[productId] ?? 1) + 1),
+      [productId]: nextQuantity,
     }));
+
+    syncCartQuantity(productId, nextQuantity);
   }
 
   function handleQuantityInput(productId: string, value: string) {
     if (value === "") {
       setQuantities((current) => ({
         ...current,
-        [productId]: 1,
+        [productId]: 0,
       }));
+
+      syncCartQuantity(productId, 0);
       return;
     }
 
     const parsedValue = Number.parseInt(value, 10);
 
-    if (!Number.isNaN(parsedValue)) {
-      setQuantities((current) => ({
-        ...current,
-        [productId]: Math.min(999, Math.max(1, parsedValue)),
-      }));
+    if (Number.isNaN(parsedValue)) {
+      return;
     }
+
+    const nextQuantity = Math.min(999, Math.max(0, parsedValue));
+
+    setQuantities((current) => ({
+      ...current,
+      [productId]: nextQuantity,
+    }));
+
+    syncCartQuantity(productId, nextQuantity);
   }
 
   useEffect(() => {
@@ -240,8 +293,8 @@ export default function Products() {
           .filter(
             (item) =>
               item &&
-              typeof item._id === "string" &&
-              item._id.length > 0 &&
+              typeof (item._id ?? item.id) === "string" &&
+              (item._id ?? item.id)!.length > 0 &&
               typeof item.name === "string" &&
               typeof item.category === "string"
           )
@@ -271,7 +324,7 @@ export default function Products() {
     return () => controller.abort();
   }, []);
 
-  // Build category filters from the products in the database.
+  // Build category filters from the database products.
   const categories = useMemo(() => {
     const databaseCategories = [
       ...new Set(products.map((product) => product.category)),
@@ -288,7 +341,7 @@ export default function Products() {
     return ["All Products", ...preferred, ...extra];
   }, [products]);
 
-  // Search, filter, and sort before applying pagination.
+  // Search, filter, and sort products.
   const filteredProducts = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
 
@@ -323,7 +376,6 @@ export default function Products() {
     return result;
   }, [products, activeCategory, searchTerm, sortBy]);
 
-  // Pagination calculations.
   const totalPages = Math.ceil(
     filteredProducts.length / PRODUCTS_PER_PAGE
   );
@@ -337,12 +389,10 @@ export default function Products() {
     );
   }, [filteredProducts, currentPage]);
 
-  // Reset to page 1 whenever the search, category, or sorting changes.
   useEffect(() => {
     setCurrentPage(1);
   }, [activeCategory, searchTerm, sortBy]);
 
-  // Keep the current page valid if the number of results changes.
   useEffect(() => {
     if (totalPages > 0 && currentPage > totalPages) {
       setCurrentPage(totalPages);
@@ -360,29 +410,37 @@ export default function Products() {
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  // Add the selected quantity to the cart.
+  // Add a product once; later clicks synchronize the chosen quantity.
   function addProductToCart(product: Product) {
     if (product.stockStatus === "sold_out" || !product.id) {
       return;
     }
 
-    const quantity = getQuantity(product.id);
+    const currentQuantity = getQuantity(product.id);
+    const quantity = currentQuantity === 0 ? 1 : currentQuantity;
 
-    addToCart(
-      {
-        id: product.id,
-        name: product.name,
-        category: product.category,
-        price: product.price,
-        image: product.image,
-        content: product.content,
-      },
-      quantity
-    );
+    setQuantities((current) => ({
+      ...current,
+      [product.id]: quantity,
+    }));
 
-    setNotice(
-      `${quantity} × ${product.name} added to your cart.`
-    );
+    const cartProduct = {
+      id: product.id,
+      name: product.name,
+      category: product.category,
+      price: product.price,
+      image: product.image,
+      content: product.content,
+    };
+
+    if (isInCart(product.id)) {
+      // Update the existing item instead of incrementing it again.
+      updateQuantity(product.id, quantity);
+    } else {
+      addToCart(cartProduct, quantity);
+    }
+
+    setNotice(`${quantity} × ${product.name} added to your cart.`);
   }
 
   function getProductImageUrl(image?: string) {
@@ -390,19 +448,13 @@ export default function Products() {
       return "";
     }
 
-    // Already a complete URL.
     if (/^https?:\/\//i.test(image)) {
       return image;
     }
 
-    // Remove accidental leading slash.
     const cleanImage = image.replace(/^\/+/, "");
 
     return `${API_BASE_URL}/product-images/${encodeURIComponent(cleanImage)}`;
-  }
-
-  function isInCart(productId: string) {
-    return cartItems.some((item) => item.id === productId);
   }
 
   return (
@@ -611,39 +663,38 @@ export default function Products() {
                   >
                     {/* Product image */}
                     <div className="relative flex h-52 items-center justify-center overflow-hidden bg-gradient-to-br from-[#fff0d4] via-[#fff8ee] to-[#f5dfd0]">
-{product.image ? (
-  <button
-    type="button"
-    onClick={() =>
-      setSelectedImage({
-        url: getProductImageUrl(product.image),
-        name: product.name,
-      })
-    }
-    aria-label={`View larger image of ${product.name}`}
-    className="h-full w-full cursor-zoom-in"
-  >
-    <img
-      src={getProductImageUrl(product.image)}
-      alt={product.name}
-      loading="lazy"
-      className="h-full w-full object-contain p-3 transition duration-300 group-hover:scale-105"
-      onError={(event) => {
-        event.currentTarget.style.display = "none";
+                      {product.image ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setSelectedImage({
+                              url: getProductImageUrl(product.image),
+                              name: product.name,
+                            })
+                          }
+                          aria-label={`View larger image of ${product.name}`}
+                          className="h-full w-full cursor-zoom-in"
+                        >
+                          <img
+                            src={getProductImageUrl(product.image)}
+                            alt={product.name}
+                            loading="lazy"
+                            className="h-full w-full object-contain p-3 transition duration-300 group-hover:scale-105"
+                            onError={(event) => {
+                              event.currentTarget.style.display = "none";
 
-        const fallback = event.currentTarget
-          .parentElement?.parentElement
-          ?.querySelector(".product-image-fallback");
+                              const fallback = event.currentTarget
+                                .parentElement?.parentElement
+                                ?.querySelector(".product-image-fallback");
 
-        if (fallback instanceof HTMLElement) {
-          fallback.classList.remove("hidden");
-        }
-      }}
-    />
-  </button>
-) : null}
+                              if (fallback instanceof HTMLElement) {
+                                fallback.classList.remove("hidden");
+                              }
+                            }}
+                          />
+                        </button>
+                      ) : null}
 
-                      {/* Fallback when image is missing or fails */}
                       <span
                         className={`product-image-fallback select-none text-7xl transition duration-300 group-hover:scale-110 ${
                           product.image ? "hidden" : ""
@@ -705,7 +756,7 @@ export default function Products() {
                             <button
                               type="button"
                               onClick={() => decreaseQuantity(product.id)}
-                              disabled={quantity <= 1}
+                              disabled={quantity <= 0}
                               aria-label={`Decrease quantity for ${product.name}`}
                               className="flex h-10 w-10 items-center justify-center text-lg font-bold text-[#4a1018] transition hover:bg-[#f8e8cb] disabled:cursor-not-allowed disabled:opacity-40"
                             >
@@ -713,21 +764,24 @@ export default function Products() {
                             </button>
 
                             <input
-  id={`quantity-${product.id}`}
-  type="number"
-  min={1}
-  max={999}
-  step={1}
-  value={quantity}
-  onChange={(event) =>
-    handleQuantityInput(product.id, event.target.value)
-  }
-  onWheel={(event) => {
-    event.currentTarget.blur();
-  }}
-  aria-label={`Quantity for ${product.name}`}
-  className="h-10 w-14 border-x border-[#eadfce] text-center text-sm font-bold outline-none"
-/>
+                              id={`quantity-${product.id}`}
+                              type="number"
+                              min={0}
+                              max={999}
+                              step={1}
+                              value={quantity}
+                              onChange={(event) =>
+                                handleQuantityInput(
+                                  product.id,
+                                  event.target.value
+                                )
+                              }
+                              onWheel={(event) => {
+                                event.currentTarget.blur();
+                              }}
+                              aria-label={`Quantity for ${product.name}`}
+                              className="h-10 w-14 border-x border-[#eadfce] text-center text-sm font-bold outline-none"
+                            />
 
                             <button
                               type="button"
@@ -844,7 +898,6 @@ export default function Products() {
               </nav>
             )}
 
-            {/* Current page summary */}
             <p className="mt-3 text-center text-sm text-gray-500">
               Showing{" "}
               {(currentPage - 1) * PRODUCTS_PER_PAGE + 1}–
@@ -936,44 +989,44 @@ export default function Products() {
       </section>
 
       {/* Full-size product image preview */}
-{selectedImage && (
-  <div
-    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
-    onClick={() => setSelectedImage(null)}
-    role="presentation"
-  >
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Image preview: ${selectedImage.name}`}
-      className="relative w-full max-w-3xl rounded-2xl bg-white p-3 shadow-2xl sm:p-5"
-      onClick={(event) => event.stopPropagation()}
-    >
-      <button
-        type="button"
-        onClick={() => setSelectedImage(null)}
-        aria-label="Close image preview"
-        className="absolute right-3 top-3 z-10 rounded-full bg-white p-2 text-gray-800 shadow-md transition hover:bg-gray-100"
-      >
-        <X size={22} />
-      </button>
+      {selectedImage && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+          onClick={() => setSelectedImage(null)}
+          role="presentation"
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Image preview: ${selectedImage.name}`}
+            className="relative w-full max-w-3xl rounded-2xl bg-white p-3 shadow-2xl sm:p-5"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setSelectedImage(null)}
+              aria-label="Close image preview"
+              className="absolute right-3 top-3 z-10 rounded-full bg-white p-2 text-gray-800 shadow-md transition hover:bg-gray-100"
+            >
+              <X size={22} />
+            </button>
 
-      <img
-        src={selectedImage.url}
-        alt={selectedImage.name}
-        className="max-h-[75vh] w-full rounded-xl object-contain"
-      />
+            <img
+              src={selectedImage.url}
+              alt={selectedImage.name}
+              className="max-h-[75vh] w-full rounded-xl object-contain"
+            />
 
-      <h3 className="mt-3 text-center text-lg font-bold text-[#4a1018]">
-        {selectedImage.name}
-      </h3>
+            <h3 className="mt-3 text-center text-lg font-bold text-[#4a1018]">
+              {selectedImage.name}
+            </h3>
 
-      <p className="mt-1 text-center text-xs text-gray-500">
-        Click outside the image or press the close button to return.
-      </p>
-    </div>
-  </div>
-)}
+            <p className="mt-1 text-center text-xs text-gray-500">
+              Click outside the image or press the close button to return.
+            </p>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

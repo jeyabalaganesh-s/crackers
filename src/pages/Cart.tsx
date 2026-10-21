@@ -3,7 +3,7 @@ import { ArrowLeft, Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { useEffect } from "react";
 
-const MIN_ORDER_AMOUNT = 3000;
+const MIN_ORDER_AMOUNT = 2500;
 
 const money = (amount: number) =>
   new Intl.NumberFormat("en-IN", {
