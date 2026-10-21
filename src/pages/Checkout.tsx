@@ -1,3 +1,4 @@
+
 import { useState, useEffect, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -18,6 +19,15 @@ const money = (amount: number) =>
     currency: "INR",
     maximumFractionDigits: 2,
   }).format(amount);
+
+// PDF-safe currency formatting.
+// Avoids unsupported rupee glyphs and unusual spacing in Helvetica.
+const pdfMoney = (amount: number) =>
+  `INR ${new Intl.NumberFormat("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    useGrouping: true,
+  }).format(amount)}`;
 
 type CheckoutForm = {
   name: string;
@@ -56,7 +66,6 @@ function downloadOrderPDF(order: OrderPDFDetails) {
   const pageHeight = pdf.internal.pageSize.getHeight();
   const margin = 14;
 
-
   // Header
   pdf.setFillColor(74, 16, 24);
   pdf.rect(0, 0, pageWidth, 40, "F");
@@ -84,20 +93,28 @@ function downloadOrderPDF(order: OrderPDFDetails) {
   pdf.text(`Order Number: ${order.orderNumber}`, margin, 61);
   pdf.text(`Order Date: ${orderDate}`, margin, 68);
 
+  // GPay / UPI contact
+  pdf.setFont("helvetica", "bold");
+  pdf.setTextColor(74, 16, 24);
+  pdf.text("GPay / UPI Contact: 6369342316", margin, 77);
+
   // Customer details
+  pdf.setTextColor(37, 23, 20);
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(12);
-  pdf.text("Customer Details", margin, 82);
+  pdf.text("Customer Details", margin, 89);
 
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(10);
 
-  let customerY = 91;
+  let customerY = 98;
 
   const customerLines = [
     `Name: ${order.customer.name}`,
     `Phone: ${order.customer.phone}`,
-    ...(order.customer.email ? [`Email: ${order.customer.email}`] : []),
+    ...(order.customer.email
+      ? [`Email: ${order.customer.email}`]
+      : []),
     `Address: ${order.customer.address}`,
     `State: ${order.customer.state}`,
     `City / Town: ${order.customer.city}`,
@@ -105,7 +122,11 @@ function downloadOrderPDF(order: OrderPDFDetails) {
   ];
 
   customerLines.forEach((line) => {
-    const wrapped = pdf.splitTextToSize(line, pageWidth - margin * 2);
+    const wrapped = pdf.splitTextToSize(
+      line,
+      pageWidth - margin * 2,
+    );
+
     pdf.text(wrapped, margin, customerY);
     customerY += wrapped.length * 5 + 1;
   });
@@ -115,7 +136,11 @@ function downloadOrderPDF(order: OrderPDFDetails) {
 
   autoTable(pdf, {
     startY: tableStartY,
-    margin: { left: margin, right: margin },
+    margin: {
+      left: margin,
+      right: margin,
+      bottom: 20,
+    },
     head: [
       ["Product", "Category", "Qty", "Unit Price", "Line Total"],
     ],
@@ -123,20 +148,25 @@ function downloadOrderPDF(order: OrderPDFDetails) {
       item.name,
       item.category || "-",
       String(item.quantity),
-      money(item.price),
-      money(item.price * item.quantity),
+      pdfMoney(item.price),
+      pdfMoney(item.price * item.quantity),
     ]),
     theme: "grid",
     styles: {
+      font: "helvetica",
+      fontStyle: "normal",
       fontSize: 8,
       cellPadding: 3,
       overflow: "linebreak",
       textColor: [37, 23, 20],
+      lineColor: [210, 210, 210],
+      lineWidth: 0.15,
     },
     headStyles: {
       fillColor: [74, 16, 24],
       textColor: [255, 255, 255],
       fontStyle: "bold",
+      halign: "left",
     },
     columnStyles: {
       0: { cellWidth: 55 },
@@ -159,13 +189,15 @@ function downloadOrderPDF(order: OrderPDFDetails) {
     summaryY = 20;
   }
 
+  // Listed subtotal
+  pdf.setTextColor(37, 23, 20);
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(12);
   pdf.text("Listed Subtotal:", margin, summaryY);
 
-  pdf.setFontSize(13);
+  pdf.setFontSize(12);
   pdf.text(
-    money(order.subtotal),
+    pdfMoney(order.subtotal),
     pageWidth - margin,
     summaryY,
     { align: "right" },
@@ -173,6 +205,7 @@ function downloadOrderPDF(order: OrderPDFDetails) {
 
   summaryY += 12;
 
+  // Order notes
   if (order.customer.notes.trim()) {
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(10);
@@ -197,9 +230,10 @@ function downloadOrderPDF(order: OrderPDFDetails) {
 
   // Disclaimer
   const disclaimer =
-    "This document is an order enquiry summary, not a tax invoice or payment receipt. " +
-    "Product availability, final prices, delivery charges and order confirmation " +
-    "must be verified by Shiva Fire Works. No online payment has been taken.";
+    "This document is an order enquiry summary, not a tax invoice " +
+    "or payment receipt. Product availability, final prices, delivery " +
+    "charges and order confirmation must be verified by Shiva Fire Works. " +
+    "No online payment has been taken.";
 
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(8);
@@ -239,6 +273,7 @@ export default function Checkout() {
   const [error, setError] = useState("");
   const [confirmation, setConfirmation] =
     useState<OrderConfirmation | null>(null);
+
   const MIN_ORDER_AMOUNT = 2500;
 
   useEffect(() => {
@@ -261,7 +296,9 @@ export default function Checkout() {
     setError("");
 
     if (items.length === 0) {
-      setError("Your cart is empty. Please add products before checkout.");
+      setError(
+        "Your cart is empty. Please add products before checkout.",
+      );
       return;
     }
 
@@ -274,13 +311,14 @@ export default function Checkout() {
     }
 
     if (cartTotal < MIN_ORDER_AMOUNT) {
-  alert(
-    `Minimum order amount is ₹${MIN_ORDER_AMOUNT.toLocaleString("en-IN")}. ` +
-    `Please add ₹${(MIN_ORDER_AMOUNT - cartTotal).toLocaleString("en-IN")} ` +
-    `more to continue.`
-  );
-  return;
-}
+      alert(
+        `Minimum order amount is ₹${MIN_ORDER_AMOUNT.toLocaleString("en-IN")}. ` +
+          `Please add ₹${(
+            MIN_ORDER_AMOUNT - cartTotal
+          ).toLocaleString("en-IN")} more to continue.`,
+      );
+      return;
+    }
 
     // Keep a snapshot before the cart is cleared.
     const orderItems = items.map((item) => ({
@@ -319,14 +357,14 @@ export default function Checkout() {
         !data?.order?.orderNumber
       ) {
         throw new Error(
-          data?.message || "Unable to submit your order. Please try again.",
+          data?.message ||
+            "Unable to submit your order. Please try again.",
         );
       }
 
       const savedOrder = data.order;
 
-      // Generate the PDF from the saved order number and the cart snapshot.
-      // The order is saved before the PDF is generated.
+      // Generate the PDF from the saved order number and cart snapshot.
       downloadOrderPDF({
         orderNumber: savedOrder.orderNumber,
         subtotal:
@@ -337,7 +375,7 @@ export default function Checkout() {
         items: orderItems,
       });
 
-      // Only clear the cart after the order has been saved.
+      // Clear the cart only after the order has been saved.
       clearCart();
 
       setConfirmation({
@@ -359,6 +397,7 @@ export default function Checkout() {
     }
   }
 
+  // Successful order confirmation
   if (confirmation) {
     return (
       <main className="min-h-screen bg-[#fffaf2] px-5 py-16 text-[#251714]">
@@ -373,9 +412,9 @@ export default function Checkout() {
           </h1>
 
           <p className="mt-3 text-gray-600">
-            Thank you for choosing Shiva Fire Works. Your order summary PDF
-            should download automatically. We will contact you to confirm
-            availability and final order details.
+            Thank you for choosing Shiva Fire Works. Your order
+            summary PDF should download automatically. We will
+            contact you to confirm availability and final order details.
           </p>
 
           <div className="mt-7 rounded-2xl bg-[#fffaf2] p-5 text-left">
@@ -408,10 +447,14 @@ export default function Checkout() {
     );
   }
 
+  // Empty cart
   if (items.length === 0) {
     return (
       <main className="min-h-screen bg-[#fffaf2] px-5 py-16 text-center text-[#251714]">
-        <ShoppingCart className="mx-auto text-[#a36d1c]" size={44} />
+        <ShoppingCart
+          className="mx-auto text-[#a36d1c]"
+          size={44}
+        />
 
         <h1 className="mt-4 text-3xl font-black">
           Your cart is empty
@@ -431,6 +474,7 @@ export default function Checkout() {
     );
   }
 
+  // Checkout page
   return (
     <main className="min-h-screen bg-[#fffaf2] px-5 py-12 text-[#251714]">
       <div className="mx-auto max-w-6xl">
@@ -447,7 +491,8 @@ export default function Checkout() {
         </h1>
 
         <p className="mt-2 text-gray-600">
-          Enter your details so Shiva Fire Works can contact you about your order.
+          Enter your details so Shiva Fire Works can contact you
+          about your order.
         </p>
 
         {error && (
@@ -654,9 +699,9 @@ export default function Checkout() {
             </button>
 
             <p className="text-xs leading-5 text-gray-500">
-              Submitting this form saves your order enquiry. It does not
-              process payment or guarantee stock. Your order summary PDF
-              will be generated after a successful submission.
+              Submitting this form saves your order enquiry. It does
+              not process payment or guarantee stock. Your order
+              summary PDF will be generated after a successful submission.
             </p>
           </form>
 
@@ -693,8 +738,8 @@ export default function Checkout() {
             </div>
 
             <p className="mt-3 text-xs leading-5 text-gray-500">
-              Delivery charges or other applicable costs, if any, must be
-              confirmed by Shiva Fire Works.
+              Delivery charges or other applicable costs, if any,
+              must be confirmed by Shiva Fire Works.
             </p>
           </aside>
         </div>
