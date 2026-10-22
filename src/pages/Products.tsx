@@ -4,7 +4,6 @@ import {
   ArrowRight,
   Check,
   Flame,
-  Filter,
   Search,
   ShoppingCart,
   SlidersHorizontal,
@@ -151,8 +150,6 @@ export default function Products() {
 
   const [products, setProducts] = useState<Product[]>([]);
   const [activeCategory, setActiveCategory] = useState("All Products");
-  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
-  const [draftCategory, setDraftCategory] = useState("All Products");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("featured");
   const [currentPage, setCurrentPage] = useState(1);
@@ -610,47 +607,50 @@ export default function Products() {
           </div>
         )}
 
-        {/* Category filter trigger */}
-        <div className="mt-7 flex flex-col gap-3 rounded-2xl border border-[#eadfce] bg-white p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-          <div className="min-w-0">
-            <p className="text-[9px] font-bold uppercase tracking-wide text-[#a36d1c] sm:text-xs sm:tracking-widest">
-              Browse catalogue
-            </p>
-            <p className="mt-1 font-extrabold text-[#4a1018]">
-              {activeCategory === "All Products" ? "All Categories" : activeCategory}
-            </p>
-            <p className="mt-1 text-sm text-gray-500">
-              {activeCategory === "All Products"
-                ? "Choose a category to find products faster."
-                : `${filteredProducts.length} products in this category`}
-            </p>
-          </div>
-
-          <div className="flex shrink-0 flex-wrap gap-2">
+        {/* Inline category filters */}
+        <div className="mt-6 rounded-xl border border-[#eadfce] bg-white p-3 sm:mt-7 sm:rounded-2xl sm:p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wide text-[#a36d1c]">
+                Categories
+              </p>
+              <p className="mt-1 text-xs text-gray-500">
+                {filteredProducts.length} {filteredProducts.length === 1 ? "product" : "products"}
+              </p>
+            </div>
             {activeCategory !== "All Products" && (
               <button
                 type="button"
                 onClick={() => {
                   setActiveCategory("All Products");
-                  setDraftCategory("All Products");
                   setNotice("");
                 }}
-                className="rounded-xl border border-[#eadfce] px-4 py-3 text-sm font-bold text-[#4a1018] transition hover:bg-[#fff5e3]"
+                className="shrink-0 rounded-lg border border-[#eadfce] px-3 py-1.5 text-xs font-bold text-[#4a1018] transition hover:bg-[#fff5e3]"
               >
-                Clear filter
+                Clear
               </button>
             )}
-            <button
-              type="button"
-              onClick={() => {
-                setDraftCategory(activeCategory);
-                setCategoryModalOpen(true);
-              }}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#4a1018] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#641722] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a36d1c] focus-visible:ring-offset-2"
-            >
-              <Filter size={17} />
-              {activeCategory === "All Products" ? "Filter by Category" : "Change Category"}
-            </button>
+          </div>
+
+          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {categories.map((category) => (
+              <button
+                key={category}
+                type="button"
+                onClick={() => {
+                  setActiveCategory(category);
+                  setNotice("");
+                }}
+                aria-pressed={activeCategory === category}
+                className={`shrink-0 whitespace-nowrap rounded-full border px-3 py-2 text-xs font-bold transition sm:px-4 sm:py-2.5 sm:text-sm ${
+                  activeCategory === category
+                    ? "border-[#4a1018] bg-[#4a1018] text-white shadow-sm"
+                    : "border-[#eadfce] bg-[#fffaf2] text-gray-700 hover:border-[#4a1018] hover:text-[#4a1018]"
+                }`}
+              >
+                {category}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -1013,134 +1013,6 @@ export default function Products() {
           </Link>
         </div>
       </section>
-
-      {/* Category selection modal */}
-      {categoryModalOpen && (
-        <div
-          className="fixed inset-0 z-[90] flex items-end justify-center bg-black/60 p-0 backdrop-blur-sm sm:items-center sm:p-4"
-          onClick={() => setCategoryModalOpen(false)}
-          role="presentation"
-        >
-          <section
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="category-modal-title"
-            className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-t-3xl bg-[#fffaf2] shadow-2xl sm:rounded-3xl"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-4 border-b border-[#eadfce] bg-white px-5 py-5 sm:px-7">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#a36d1c]">
-                  Shiva Fire Works · Sivakasi
-                </p>
-                <h2 id="category-modal-title" className="mt-1 text-2xl font-black text-[#4a1018]">
-                  Choose a Category
-                </h2>
-                <p className="mt-1 text-sm text-gray-500">
-                  Select a category to see its products.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setCategoryModalOpen(false)}
-                aria-label="Close category selection"
-                className="rounded-full p-2 text-gray-500 transition hover:bg-[#fff0d4] hover:text-[#4a1018]"
-              >
-                <X size={22} />
-              </button>
-            </div>
-
-            <div className="overflow-y-auto px-5 py-5 sm:px-7">
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
-                {categories.map((category) => {
-                  const categoryProducts = products.filter(
-                    (product) => category === "All Products" || product.category === category
-                  );
-                  const representativeProduct = products.find(
-                    (product) => category === "All Products" || product.category === category
-                  );
-                  const categoryImage = representativeProduct?.image
-                    ? getProductImageUrl(representativeProduct.image)
-                    : "";
-                  const selected = draftCategory === category;
-
-                  return (
-                    <button
-                      key={category}
-                      type="button"
-                      onClick={() => setDraftCategory(category)}
-                      aria-pressed={selected}
-                      className={`group overflow-hidden rounded-2xl border-2 bg-white text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a36d1c] focus-visible:ring-offset-2 ${
-                        selected
-                          ? "border-[#4a1018] ring-2 ring-[#4a1018]/10"
-                          : "border-[#eadfce] hover:border-[#c9a15c] hover:shadow-md"
-                      }`}
-                    >
-                      <div className="relative flex h-28 items-center justify-center overflow-hidden bg-gradient-to-br from-[#fff0d4] via-[#fff8ee] to-[#f5dfd0] sm:h-36">
-                        {categoryImage ? (
-                          <img
-                            src={categoryImage}
-                            alt={category}
-                            loading="lazy"
-                            className="h-full w-full object-contain p-2 transition duration-300 group-hover:scale-105"
-                            onError={(event) => {
-                              event.currentTarget.style.display = "none";
-                            }}
-                          />
-                        ) : (
-                          <span className="text-5xl" aria-hidden="true">
-                            {getCategoryEmoji(category)}
-                          </span>
-                        )}
-                        {selected && (
-                          <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-[#4a1018] text-white">
-                            <Check size={14} />
-                          </span>
-                        )}
-                      </div>
-                      <div className="p-3 sm:p-4">
-                        <p className="text-sm font-extrabold leading-5 text-[#35100d]">
-                          {category}
-                        </p>
-                        <p className="mt-1 text-[10px] text-gray-500 sm:text-xs">
-                          {categoryProducts.length} {categoryProducts.length === 1 ? "product" : "products"}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="flex flex-col-reverse gap-3 border-t border-[#eadfce] bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
-              <p className="text-sm text-gray-500">
-                Selected: <span className="font-bold text-[#4a1018]">{draftCategory}</span>
-              </p>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setCategoryModalOpen(false)}
-                  className="flex-1 rounded-xl border border-[#eadfce] px-5 py-3 text-sm font-bold text-[#4a1018] transition hover:bg-[#fff5e3] sm:flex-none"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveCategory(draftCategory);
-                    setCategoryModalOpen(false);
-                    setNotice("");
-                    setCurrentPage(1);
-                  }}
-                  className="flex-1 rounded-xl bg-[#4a1018] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#641722] sm:flex-none"
-                >
-                  View Products
-                </button>
-              </div>
-            </div>
-          </section>
-        </div>
-      )}
 
       {/* Full-size product image preview */}
       {selectedImage && (
