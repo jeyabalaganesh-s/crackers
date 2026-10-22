@@ -632,8 +632,7 @@ export default function Products() {
             )}
           </div>
 
-          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {categories.map((category) => (
+<div className="-mx-1 flex flex-nowrap gap-2 overflow-x-auto overscroll-x-contain px-1 pb-3 [scrollbar-width:thin] [scrollbar-color:#c8a878_transparent]">            {categories.map((category) => (
               <button
                 key={category}
                 type="button"
