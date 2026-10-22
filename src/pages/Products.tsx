@@ -4,6 +4,7 @@ import {
   ArrowRight,
   Check,
   Flame,
+  Filter,
   Search,
   ShoppingCart,
   SlidersHorizontal,
@@ -150,6 +151,8 @@ export default function Products() {
 
   const [products, setProducts] = useState<Product[]>([]);
   const [activeCategory, setActiveCategory] = useState("All Products");
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const [draftCategory, setDraftCategory] = useState("All Products");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("featured");
   const [currentPage, setCurrentPage] = useState(1);
@@ -607,38 +610,61 @@ export default function Products() {
           </div>
         )}
 
-        {/* Category filters */}
-        <div className="mt-8 flex gap-3 overflow-x-auto pb-3">
-          {categories.map((category) => (
+        {/* Category filter trigger */}
+        <div className="mt-7 flex flex-col gap-3 rounded-2xl border border-[#eadfce] bg-white p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+          <div className="min-w-0">
+            <p className="text-[9px] font-bold uppercase tracking-wide text-[#a36d1c] sm:text-xs sm:tracking-widest">
+              Browse catalogue
+            </p>
+            <p className="mt-1 font-extrabold text-[#4a1018]">
+              {activeCategory === "All Products" ? "All Categories" : activeCategory}
+            </p>
+            <p className="mt-1 text-sm text-gray-500">
+              {activeCategory === "All Products"
+                ? "Choose a category to find products faster."
+                : `${filteredProducts.length} products in this category`}
+            </p>
+          </div>
+
+          <div className="flex shrink-0 flex-wrap gap-2">
+            {activeCategory !== "All Products" && (
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveCategory("All Products");
+                  setDraftCategory("All Products");
+                  setNotice("");
+                }}
+                className="rounded-xl border border-[#eadfce] px-4 py-3 text-sm font-bold text-[#4a1018] transition hover:bg-[#fff5e3]"
+              >
+                Clear filter
+              </button>
+            )}
             <button
-              key={category}
               type="button"
               onClick={() => {
-                setActiveCategory(category);
-                setNotice("");
+                setDraftCategory(activeCategory);
+                setCategoryModalOpen(true);
               }}
-              className={`shrink-0 rounded-full px-5 py-3 text-sm font-bold transition ${
-                activeCategory === category
-                  ? "bg-[#4a1018] text-white shadow-md"
-                  : "border border-[#eadfce] bg-white text-gray-700 hover:border-[#4a1018] hover:text-[#4a1018]"
-              }`}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#4a1018] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#641722] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a36d1c] focus-visible:ring-offset-2"
             >
-              {category}
+              <Filter size={17} />
+              {activeCategory === "All Products" ? "Filter by Category" : "Change Category"}
             </button>
-          ))}
+          </div>
         </div>
 
         {/* Loading state */}
         {loading ? (
-          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: 8 }).map((_, index) => (
               <div
                 key={index}
-                className="animate-pulse overflow-hidden rounded-2xl border border-[#eee3d4] bg-white"
+                className="animate-pulse overflow-hidden rounded-xl border border-[#eee3d4] bg-white sm:rounded-2xl"
               >
-                <div className="h-52 bg-[#f2e7d8]" />
+                <div className="h-28 bg-[#f2e7d8] sm:h-52" />
 
-                <div className="space-y-3 p-5">
+                <div className="space-y-2 p-3 sm:space-y-3 sm:p-5">
                   <div className="h-3 w-1/3 rounded bg-[#eee3d4]" />
                   <div className="h-5 w-3/4 rounded bg-[#eee3d4]" />
                   <div className="h-4 w-full rounded bg-[#eee3d4]" />
@@ -650,7 +676,7 @@ export default function Products() {
         ) : filteredProducts.length > 0 ? (
           <>
             {/* Product grid */}
-            <div className="mt-7 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
               {paginatedProducts.map((product) => {
                 const soldOut = product.stockStatus === "sold_out";
                 const added = isInCart(product.id);
@@ -659,10 +685,10 @@ export default function Products() {
                 return (
                   <article
                     key={product.id}
-                    className="group overflow-hidden rounded-2xl border border-[#eee3d4] bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+                    className="group min-w-0 overflow-hidden rounded-xl border border-[#eee3d4] bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:rounded-2xl"
                   >
                     {/* Product image */}
-                    <div className="relative flex h-52 items-center justify-center overflow-hidden bg-gradient-to-br from-[#fff0d4] via-[#fff8ee] to-[#f5dfd0]">
+                    <div className="relative flex h-28 items-center justify-center overflow-hidden bg-gradient-to-br from-[#fff0d4] via-[#fff8ee] to-[#f5dfd0] sm:h-52">
                       {product.image ? (
                         <button
                           type="button"
@@ -679,7 +705,7 @@ export default function Products() {
                             src={getProductImageUrl(product.image)}
                             alt={product.name}
                             loading="lazy"
-                            className="h-full w-full object-contain p-3 transition duration-300 group-hover:scale-105"
+                            className="h-full w-full object-contain p-1.5 transition duration-300 group-hover:scale-105 sm:p-3"
                             onError={(event) => {
                               event.currentTarget.style.display = "none";
 
@@ -696,7 +722,7 @@ export default function Products() {
                       ) : null}
 
                       <span
-                        className={`product-image-fallback select-none text-7xl transition duration-300 group-hover:scale-110 ${
+                        className={`product-image-fallback select-none text-4xl transition duration-300 group-hover:scale-110 sm:text-7xl ${
                           product.image ? "hidden" : ""
                         }`}
                         role="img"
@@ -706,48 +732,48 @@ export default function Products() {
                       </span>
 
                       {product.badge && !soldOut && (
-                        <span className="absolute left-4 top-4 rounded-full bg-[#4a1018] px-3 py-1.5 text-xs font-bold text-white">
+                        <span className="absolute left-2 top-2 rounded-full bg-[#4a1018] px-2 py-1 text-[10px] font-bold text-white sm:left-4 sm:top-4 sm:px-3 sm:py-1.5 sm:text-xs">
                           {product.badge}
                         </span>
                       )}
 
                       {soldOut && (
-                        <span className="absolute left-4 top-4 rounded-full bg-gray-800 px-3 py-1.5 text-xs font-bold text-white">
+                        <span className="absolute left-2 top-2 rounded-full bg-gray-800 px-2 py-1 text-[10px] font-bold text-white sm:left-4 sm:top-4 sm:px-3 sm:py-1.5 sm:text-xs">
                           Sold Out
                         </span>
                       )}
 
-                      <div className="absolute bottom-3 right-3 rounded-full bg-white/90 p-2 text-[#4a1018]">
-                        <Sparkles size={18} />
+                      <div className="absolute bottom-1.5 right-1.5 rounded-full bg-white/90 p-1 text-[#4a1018] sm:bottom-3 sm:right-3 sm:p-2">
+                        <Sparkles size={14} className="sm:h-[18px] sm:w-[18px]" />
                       </div>
                     </div>
 
                     {/* Product details */}
-                    <div className="p-5">
-                      <p className="text-xs font-bold uppercase tracking-widest text-[#a36d1c]">
+                    <div className="p-2.5 sm:p-5">
+                      <p className="text-[9px] font-bold uppercase tracking-wide text-[#a36d1c] sm:text-xs sm:tracking-widest">
                         {product.category}
                       </p>
 
-                      <h3 className="mt-2 text-lg font-extrabold">
+                      <h3 className="mt-1.5 line-clamp-2 text-sm font-extrabold leading-5 sm:mt-2 sm:text-lg sm:leading-normal">
                         {product.name}
                       </h3>
 
                       {product.content && (
-                        <p className="mt-1 text-xs font-medium text-gray-500">
+                        <p className="mt-1 line-clamp-2 text-[10px] font-medium text-gray-500 sm:text-xs">
                           Pack size: {product.content}
                         </p>
                       )}
 
-                      <p className="mt-2 min-h-10 text-sm leading-5 text-gray-600">
+                      <p className="mt-1.5 min-h-0 line-clamp-2 text-[11px] leading-4 text-gray-600 sm:mt-2 sm:min-h-10 sm:text-sm sm:leading-5">
                         {product.description}
                       </p>
 
                       {/* Quantity selector */}
                       {!soldOut && (
-                        <div className="mt-4">
+                        <div className="mt-2 sm:mt-4">
                           <label
                             htmlFor={`quantity-${product.id}`}
-                            className="mb-2 block text-xs font-bold text-gray-600"
+                            className="mb-1 block text-[10px] font-bold text-gray-600 sm:mb-2 sm:text-xs"
                           >
                             Quantity
                           </label>
@@ -758,7 +784,7 @@ export default function Products() {
                               onClick={() => decreaseQuantity(product.id)}
                               disabled={quantity <= 0}
                               aria-label={`Decrease quantity for ${product.name}`}
-                              className="flex h-10 w-10 items-center justify-center text-lg font-bold text-[#4a1018] transition hover:bg-[#f8e8cb] disabled:cursor-not-allowed disabled:opacity-40"
+                              className="flex h-8 w-7 items-center justify-center text-base font-bold text-[#4a1018] transition hover:bg-[#f8e8cb] disabled:cursor-not-allowed disabled:opacity-40 sm:h-10 sm:w-10 sm:text-lg"
                             >
                               −
                             </button>
@@ -780,7 +806,7 @@ export default function Products() {
                                 event.currentTarget.blur();
                               }}
                               aria-label={`Quantity for ${product.name}`}
-                              className="h-10 w-14 border-x border-[#eadfce] text-center text-sm font-bold outline-none"
+                              className="h-8 w-9 border-x border-[#eadfce] text-center text-xs font-bold outline-none sm:h-10 sm:w-14 sm:text-sm"
                             />
 
                             <button
@@ -788,7 +814,7 @@ export default function Products() {
                               onClick={() => increaseQuantity(product.id)}
                               disabled={quantity >= 999}
                               aria-label={`Increase quantity for ${product.name}`}
-                              className="flex h-10 w-10 items-center justify-center text-lg font-bold text-[#4a1018] transition hover:bg-[#f8e8cb] disabled:cursor-not-allowed disabled:opacity-40"
+                              className="flex h-8 w-7 items-center justify-center text-base font-bold text-[#4a1018] transition hover:bg-[#f8e8cb] disabled:cursor-not-allowed disabled:opacity-40 sm:h-10 sm:w-10 sm:text-lg"
                             >
                               +
                             </button>
@@ -797,23 +823,23 @@ export default function Products() {
                       )}
 
                       {/* Price and Add to Cart */}
-                      <div className="mt-5 flex items-center justify-between gap-3 border-t border-[#f0e7dc] pt-4">
+                      <div className="mt-3 flex flex-col items-stretch gap-2 border-t border-[#f0e7dc] pt-3 sm:mt-5 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:pt-4">
                         <div className="min-w-0">
-                          <p className="text-xs text-gray-500">
+                          <p className="text-[10px] text-gray-500 sm:text-xs">
                             {soldOut ? "Availability" : "Listed price"}
                           </p>
 
                           {soldOut ? (
-                            <p className="mt-1 text-sm font-extrabold text-red-700">
+                            <p className="mt-1 text-xs font-extrabold text-red-700 sm:text-sm">
                               Sold Out
                             </p>
                           ) : (
                             <>
-                              <p className="mt-1 text-sm font-extrabold text-[#4a1018]">
+                              <p className="mt-1 text-xs font-extrabold text-[#4a1018] sm:text-sm">
                                 {formatPrice(product.price)}
                               </p>
 
-                              <p className="mt-1 text-xs text-gray-500">
+                              <p className="mt-1 text-[10px] text-gray-500 sm:text-xs">
                                 Total: {formatPrice(product.price * quantity)}
                               </p>
                             </>
@@ -824,7 +850,7 @@ export default function Products() {
                           type="button"
                           onClick={() => addProductToCart(product)}
                           disabled={soldOut || !product.id}
-                          className={`flex shrink-0 items-center justify-center gap-2 rounded-xl px-3 py-3 text-sm font-bold transition disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 ${
+                          className={`flex w-full shrink-0 items-center justify-center gap-1 rounded-lg px-2 py-2 text-[11px] font-bold transition disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 sm:w-auto sm:gap-2 sm:rounded-xl sm:px-3 sm:py-3 sm:text-sm ${
                             added
                               ? "bg-green-100 text-green-800 hover:bg-green-200"
                               : "bg-[#f8c54d] text-[#35100d] hover:bg-[#edb62d]"
@@ -839,8 +865,8 @@ export default function Products() {
                             </>
                           ) : (
                             <>
-                              <ShoppingCart size={16} />
-                              Add to Cart
+                              <ShoppingCart size={14} className="sm:h-4 sm:w-4" />
+                              <span className="sm:hidden">Add</span><span className="hidden sm:inline">Add to Cart</span>
                             </>
                           )}
                         </button>
@@ -938,24 +964,24 @@ export default function Products() {
           </div>
         )}
 
-        {/* Cart summary bar */}
+        {/* Compact cart summary bar: space-saving on mobile */}
         {cartCount > 0 && (
-          <div className="fixed inset-x-4 bottom-4 z-50 mx-auto flex max-w-3xl flex-col gap-4 rounded-2xl bg-[#2d0c10] p-4 text-white shadow-2xl sm:flex-row sm:items-center sm:justify-between sm:p-5">
-            <div>
-              <p className="font-extrabold">
+          <div className="fixed inset-x-3 bottom-3 z-50 mx-auto flex max-w-3xl items-center justify-between gap-3 rounded-xl bg-[#2d0c10] px-3 py-2.5 text-white shadow-2xl sm:inset-x-4 sm:bottom-4 sm:rounded-2xl sm:p-5">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-extrabold sm:text-base">
                 {cartCount} item{cartCount !== 1 ? "s" : ""} in your cart
               </p>
 
-              <p className="mt-1 text-xs text-white/70">
+              <p className="mt-1 hidden text-xs text-white/70 sm:block">
                 Your selected products are saved in your cart.
               </p>
             </div>
 
             <Link
               to="/cart"
-              className="flex items-center justify-center gap-2 rounded-xl bg-[#f8c54d] px-5 py-3 text-sm font-extrabold text-[#35100d] transition hover:bg-[#edb62d]"
+              className="flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-[#f8c54d] px-3 py-2 text-xs font-extrabold text-[#35100d] transition hover:bg-[#edb62d] sm:gap-2 sm:rounded-xl sm:px-5 sm:py-3 sm:text-sm"
             >
-              View Cart <ArrowRight size={17} />
+              View Cart <ArrowRight size={15} className="sm:h-[17px] sm:w-[17px]" />
             </Link>
           </div>
         )}
@@ -987,6 +1013,134 @@ export default function Products() {
           </Link>
         </div>
       </section>
+
+      {/* Category selection modal */}
+      {categoryModalOpen && (
+        <div
+          className="fixed inset-0 z-[90] flex items-end justify-center bg-black/60 p-0 backdrop-blur-sm sm:items-center sm:p-4"
+          onClick={() => setCategoryModalOpen(false)}
+          role="presentation"
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="category-modal-title"
+            className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-t-3xl bg-[#fffaf2] shadow-2xl sm:rounded-3xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4 border-b border-[#eadfce] bg-white px-5 py-5 sm:px-7">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#a36d1c]">
+                  Shiva Fire Works · Sivakasi
+                </p>
+                <h2 id="category-modal-title" className="mt-1 text-2xl font-black text-[#4a1018]">
+                  Choose a Category
+                </h2>
+                <p className="mt-1 text-sm text-gray-500">
+                  Select a category to see its products.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCategoryModalOpen(false)}
+                aria-label="Close category selection"
+                className="rounded-full p-2 text-gray-500 transition hover:bg-[#fff0d4] hover:text-[#4a1018]"
+              >
+                <X size={22} />
+              </button>
+            </div>
+
+            <div className="overflow-y-auto px-5 py-5 sm:px-7">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+                {categories.map((category) => {
+                  const categoryProducts = products.filter(
+                    (product) => category === "All Products" || product.category === category
+                  );
+                  const representativeProduct = products.find(
+                    (product) => category === "All Products" || product.category === category
+                  );
+                  const categoryImage = representativeProduct?.image
+                    ? getProductImageUrl(representativeProduct.image)
+                    : "";
+                  const selected = draftCategory === category;
+
+                  return (
+                    <button
+                      key={category}
+                      type="button"
+                      onClick={() => setDraftCategory(category)}
+                      aria-pressed={selected}
+                      className={`group overflow-hidden rounded-2xl border-2 bg-white text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a36d1c] focus-visible:ring-offset-2 ${
+                        selected
+                          ? "border-[#4a1018] ring-2 ring-[#4a1018]/10"
+                          : "border-[#eadfce] hover:border-[#c9a15c] hover:shadow-md"
+                      }`}
+                    >
+                      <div className="relative flex h-28 items-center justify-center overflow-hidden bg-gradient-to-br from-[#fff0d4] via-[#fff8ee] to-[#f5dfd0] sm:h-36">
+                        {categoryImage ? (
+                          <img
+                            src={categoryImage}
+                            alt={category}
+                            loading="lazy"
+                            className="h-full w-full object-contain p-2 transition duration-300 group-hover:scale-105"
+                            onError={(event) => {
+                              event.currentTarget.style.display = "none";
+                            }}
+                          />
+                        ) : (
+                          <span className="text-5xl" aria-hidden="true">
+                            {getCategoryEmoji(category)}
+                          </span>
+                        )}
+                        {selected && (
+                          <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-[#4a1018] text-white">
+                            <Check size={14} />
+                          </span>
+                        )}
+                      </div>
+                      <div className="p-3 sm:p-4">
+                        <p className="text-sm font-extrabold leading-5 text-[#35100d]">
+                          {category}
+                        </p>
+                        <p className="mt-1 text-[10px] text-gray-500 sm:text-xs">
+                          {categoryProducts.length} {categoryProducts.length === 1 ? "product" : "products"}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex flex-col-reverse gap-3 border-t border-[#eadfce] bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+              <p className="text-sm text-gray-500">
+                Selected: <span className="font-bold text-[#4a1018]">{draftCategory}</span>
+              </p>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setCategoryModalOpen(false)}
+                  className="flex-1 rounded-xl border border-[#eadfce] px-5 py-3 text-sm font-bold text-[#4a1018] transition hover:bg-[#fff5e3] sm:flex-none"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveCategory(draftCategory);
+                    setCategoryModalOpen(false);
+                    setNotice("");
+                    setCurrentPage(1);
+                  }}
+                  className="flex-1 rounded-xl bg-[#4a1018] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#641722] sm:flex-none"
+                >
+                  View Products
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+      )}
 
       {/* Full-size product image preview */}
       {selectedImage && (
