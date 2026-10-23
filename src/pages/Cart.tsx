@@ -3,7 +3,7 @@ import { ArrowLeft, Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { useEffect } from "react";
 
-const MIN_ORDER_AMOUNT = 2500;
+const MIN_ORDER_AMOUNT = 3000; // Minimum order amount in INR
 
 const money = (amount: number) =>
   new Intl.NumberFormat("en-IN", {
@@ -179,7 +179,7 @@ export default function Cart() {
                 >
                   {minimumOrderMet
                     ? "Minimum order requirement met"
-                    : "Minimum order: ₹2,500"}
+                    : "Minimum order: ₹3,000"}
                 </p>
 
                 {minimumOrderMet ? (

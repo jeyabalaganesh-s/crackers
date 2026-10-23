@@ -274,7 +274,7 @@ export default function Checkout() {
   const [confirmation, setConfirmation] =
     useState<OrderConfirmation | null>(null);
 
-  const MIN_ORDER_AMOUNT = 2500;
+  const MIN_ORDER_AMOUNT = 3000;
 
   useEffect(() => {
     window.scrollTo(0, 0);
