@@ -5,6 +5,8 @@ import {
   Check,
   Flame,
   Search,
+  List,
+  LayoutGrid,
   ShoppingCart,
   SlidersHorizontal,
   Sparkles,
@@ -50,7 +52,6 @@ const API_BASE_URL = (
   import.meta.env.VITE_API_URL || ""
 ).replace(/\/$/, "");
 
-const PRODUCTS_PER_PAGE = 12;
 
 const CATEGORY_OPTIONS = [
   { label: "All Products", aliases: [] },
@@ -152,7 +153,7 @@ export default function Products() {
   const [activeCategory, setActiveCategory] = useState("All Products");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("featured");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [viewMode, setViewMode] = useState<"list" | "card">("list");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -180,24 +181,39 @@ export default function Products() {
     return cartItems.some((item) => item.id === productId);
   }
 
-  // Synchronize quantity changes with the cart if the product was added.
+  // Keep the quantity selector and cart synchronized automatically.
+  // Increasing from 0 adds the product to the cart; later changes update it.
   function syncCartQuantity(productId: string, quantity: number) {
-    if (!isInCart(productId)) {
-      return;
-    }
+    const cartItem = cartItems.find((item) => item.id === productId);
 
     if (quantity <= 0) {
-      removeFromCart(productId);
-
-      setQuantities((current) => ({
-        ...current,
-        [productId]: 0,
-      }));
-
+      if (cartItem) {
+        removeFromCart(productId);
+      }
       return;
     }
 
-    updateQuantity(productId, quantity);
+    if (cartItem) {
+      updateQuantity(productId, quantity);
+      return;
+    }
+
+    const product = products.find((item) => item.id === productId);
+    if (!product || product.stockStatus === "sold_out") {
+      return;
+    }
+
+    addToCart(
+      {
+        id: product.id,
+        name: product.name,
+        category: product.category,
+        price: product.price,
+        image: product.image,
+        content: product.content,
+      },
+      quantity
+    );
   }
 
   function decreaseQuantity(productId: string) {
@@ -376,40 +392,6 @@ export default function Products() {
     return result;
   }, [products, activeCategory, searchTerm, sortBy]);
 
-  const totalPages = Math.ceil(
-    filteredProducts.length / PRODUCTS_PER_PAGE
-  );
-
-  const paginatedProducts = useMemo(() => {
-    const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
-
-    return filteredProducts.slice(
-      startIndex,
-      startIndex + PRODUCTS_PER_PAGE
-    );
-  }, [filteredProducts, currentPage]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [activeCategory, searchTerm, sortBy]);
-
-  useEffect(() => {
-    if (totalPages > 0 && currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
-  }, [currentPage, totalPages]);
-
-  function goToPage(page: number) {
-    const nextPage = Math.min(Math.max(page, 1), totalPages);
-
-    setCurrentPage(nextPage);
-    setNotice("");
-
-    document
-      .getElementById("product-catalogue")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
   // Add a product once; later clicks synchronize the chosen quantity.
   function addProductToCart(product: Product) {
     if (product.stockStatus === "sold_out" || !product.id) {
@@ -507,9 +489,9 @@ export default function Products() {
       {/* Catalogue */}
       <section
         id="product-catalogue"
-        className="mx-auto max-w-7xl px-5 py-12 sm:py-16"
+        className="mx-auto w-full max-w-7xl min-w-0 px-3 py-8 sm:px-5 sm:py-16"
       >
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex min-w-0 flex-col gap-4">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#a36d1c]">
               Our collection
@@ -526,9 +508,9 @@ export default function Products() {
             </p>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="sticky top-0 z-40 -mx-3 flex min-w-0 flex-col gap-2 border-b border-[#eadfce] bg-[#fffaf2]/95 px-3 py-3 backdrop-blur-md sm:-mx-5 sm:flex-row sm:items-center sm:justify-end sm:px-5">
             {/* Search */}
-            <div className="flex items-center gap-3 rounded-xl border border-[#eadfce] bg-white px-4 py-3 sm:w-72">
+            <div className="flex min-w-0 w-full items-center gap-3 rounded-xl border border-[#eadfce] bg-white px-3 py-3 sm:w-72 sm:px-4">
               <Search className="shrink-0 text-gray-400" size={19} />
 
               <input
@@ -567,6 +549,26 @@ export default function Products() {
                 <option value="price-low">Price: Low to high</option>
                 <option value="price-high">Price: High to low</option>
               </select>
+            </div>
+
+            {/* View mode: list is the default; card view is optional */}
+            <div className="flex shrink-0 items-center gap-1 rounded-xl border border-[#eadfce] bg-white p-1" aria-label="Product view">
+              <button
+                type="button"
+                onClick={() => setViewMode("list")}
+                aria-pressed={viewMode === "list"}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold transition ${viewMode === "list" ? "bg-[#4a1018] text-white" : "text-gray-600 hover:bg-[#fff5e3]"}`}
+              >
+                <List size={16} /> List
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("card")}
+                aria-pressed={viewMode === "card"}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold transition ${viewMode === "card" ? "bg-[#4a1018] text-white" : "text-gray-600 hover:bg-[#fff5e3]"}`}
+              >
+                <LayoutGrid size={16} /> Cards
+              </button>
             </div>
           </div>
         </div>
@@ -631,31 +633,33 @@ export default function Products() {
               </button>
             )}
           </div>
-
-<div className="-mx-1 flex flex-nowrap gap-2 overflow-x-auto overscroll-x-contain px-1 pb-3 [scrollbar-width:thin] [scrollbar-color:#c8a878_transparent]">            {categories.map((category) => (
-              <button
-                key={category}
-                type="button"
-                onClick={() => {
-                  setActiveCategory(category);
-                  setNotice("");
-                }}
-                aria-pressed={activeCategory === category}
-                className={`shrink-0 whitespace-nowrap rounded-full border px-3 py-2 text-xs font-bold transition sm:px-4 sm:py-2.5 sm:text-sm ${
-                  activeCategory === category
-                    ? "border-[#4a1018] bg-[#4a1018] text-white shadow-sm"
-                    : "border-[#eadfce] bg-[#fffaf2] text-gray-700 hover:border-[#4a1018] hover:text-[#4a1018]"
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
+<div className="-mx-1 overflow-x-auto overflow-y-hidden px-1 pb-3 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#c9b79e">
+  <div className="flex w-max min-w-full flex-nowrap gap-2">
+    {categories.map((category) => (
+      <button
+        key={category}
+        type="button"
+        onClick={() => {
+          setActiveCategory(category);
+          setNotice("");
+        }}
+        aria-pressed={activeCategory === category}
+        className={`shrink-0 whitespace-nowrap rounded-full border px-3 py-2 text-xs font-bold transition sm:px-4 sm:py-2.5 sm:text-sm ${
+          activeCategory === category
+            ? "border-[#4a1018] bg-[#4a1018] text-white shadow-sm"
+            : "border-[#eadfce] bg-[#fffaf2] text-gray-700 hover:border-[#4a1018] hover:text-[#4a1018]"
+        }`}
+      >
+        {category}
+      </button>
+    ))}
+  </div>
+</div>
         </div>
 
         {/* Loading state */}
         {loading ? (
-          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
+          <div className={`mt-8 ${viewMode === "list" ? "flex flex-col gap-3" : "grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4"}`}>
             {Array.from({ length: 8 }).map((_, index) => (
               <div
                 key={index}
@@ -674,9 +678,9 @@ export default function Products() {
           </div>
         ) : filteredProducts.length > 0 ? (
           <>
-            {/* Product grid */}
-            <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
-              {paginatedProducts.map((product) => {
+            {/* Product list / card view */}
+            <div className={`mt-7 ${viewMode === "list" ? "flex flex-col gap-2.5 sm:gap-3" : "grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4"}`}>
+              {filteredProducts.map((product) => {
                 const soldOut = product.stockStatus === "sold_out";
                 const added = isInCart(product.id);
                 const quantity = getQuantity(product.id);
@@ -684,10 +688,10 @@ export default function Products() {
                 return (
                   <article
                     key={product.id}
-                    className="group min-w-0 overflow-hidden rounded-xl border border-[#eee3d4] bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:rounded-2xl"
+                    className={`group min-w-0 overflow-hidden rounded-xl border border-[#eee3d4] bg-white transition duration-200 hover:shadow-lg sm:rounded-2xl ${viewMode === "list" ? "flex flex-row items-stretch" : "flex flex-col hover:-translate-y-1"}`}
                   >
                     {/* Product image */}
-                    <div className="relative flex h-28 items-center justify-center overflow-hidden bg-gradient-to-br from-[#fff0d4] via-[#fff8ee] to-[#f5dfd0] sm:h-52">
+                    <div className={`relative flex shrink-0 items-center justify-center overflow-hidden bg-gradient-to-br from-[#fff0d4] via-[#fff8ee] to-[#f5dfd0] ${viewMode === "list" ? "h-24 w-20 sm:h-36 sm:w-36" : "h-28 w-full sm:h-52"}`}>
                       {product.image ? (
                         <button
                           type="button"
@@ -748,7 +752,8 @@ export default function Products() {
                     </div>
 
                     {/* Product details */}
-                    <div className="p-2.5 sm:p-5">
+                    <div className={`${viewMode === "list" ? "flex min-w-0 flex-1 flex-row items-start gap-2 p-2 sm:items-center sm:gap-5 sm:p-4" : "p-2.5 sm:p-5"}`}>
+                      <div className="min-w-0 flex-1">
                       <p className="text-[9px] font-bold uppercase tracking-wide text-[#a36d1c] sm:text-xs sm:tracking-widest">
                         {product.category}
                       </p>
@@ -767,9 +772,12 @@ export default function Products() {
                         {product.description}
                       </p>
 
+                      </div>
+
+                      <div className={`${viewMode === "list" ? "flex w-[104px] shrink-0 flex-col gap-2 sm:mt-0 sm:w-[285px] sm:shrink-0 sm:flex-row sm:items-center sm:justify-end sm:gap-3" : ""}`}>
                       {/* Quantity selector */}
                       {!soldOut && (
-                        <div className="mt-2 sm:mt-4">
+                        <div className="mt-0 sm:mt-4">
                           <label
                             htmlFor={`quantity-${product.id}`}
                             className="mb-1 block text-[10px] font-bold text-gray-600 sm:mb-2 sm:text-xs"
@@ -777,13 +785,13 @@ export default function Products() {
                             Quantity
                           </label>
 
-                          <div className="flex w-fit items-center overflow-hidden rounded-xl border border-[#eadfce] bg-white">
+                          <div className="flex w-fit max-w-full items-center overflow-hidden rounded-lg border border-[#eadfce] bg-white sm:rounded-xl">
                             <button
                               type="button"
                               onClick={() => decreaseQuantity(product.id)}
                               disabled={quantity <= 0}
                               aria-label={`Decrease quantity for ${product.name}`}
-                              className="flex h-8 w-7 items-center justify-center text-base font-bold text-[#4a1018] transition hover:bg-[#f8e8cb] disabled:cursor-not-allowed disabled:opacity-40 sm:h-10 sm:w-10 sm:text-lg"
+                              className="flex h-7 w-6 items-center justify-center text-sm font-bold text-[#4a1018] transition hover:bg-[#f8e8cb] disabled:cursor-not-allowed disabled:opacity-40 sm:h-10 sm:w-10 sm:text-lg"
                             >
                               −
                             </button>
@@ -805,7 +813,7 @@ export default function Products() {
                                 event.currentTarget.blur();
                               }}
                               aria-label={`Quantity for ${product.name}`}
-                              className="h-8 w-9 border-x border-[#eadfce] text-center text-xs font-bold outline-none sm:h-10 sm:w-14 sm:text-sm"
+                              className="h-7 w-7 min-w-0 border-x border-[#eadfce] text-center text-[11px] font-bold outline-none sm:h-10 sm:w-14 sm:text-sm"
                             />
 
                             <button
@@ -813,7 +821,7 @@ export default function Products() {
                               onClick={() => increaseQuantity(product.id)}
                               disabled={quantity >= 999}
                               aria-label={`Increase quantity for ${product.name}`}
-                              className="flex h-8 w-7 items-center justify-center text-base font-bold text-[#4a1018] transition hover:bg-[#f8e8cb] disabled:cursor-not-allowed disabled:opacity-40 sm:h-10 sm:w-10 sm:text-lg"
+                              className="flex h-7 w-6 items-center justify-center text-sm font-bold text-[#4a1018] transition hover:bg-[#f8e8cb] disabled:cursor-not-allowed disabled:opacity-40 sm:h-10 sm:w-10 sm:text-lg"
                             >
                               +
                             </button>
@@ -822,9 +830,9 @@ export default function Products() {
                       )}
 
                       {/* Price and Add to Cart */}
-                      <div className="mt-3 flex flex-col items-stretch gap-2 border-t border-[#f0e7dc] pt-3 sm:mt-5 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:pt-4">
+                      <div className={`${viewMode === "list" ? "mt-0 flex min-w-0 flex-col items-stretch gap-2 border-0 pt-0 sm:items-end sm:justify-center sm:gap-2" : "mt-3 flex flex-col items-stretch gap-2 border-t border-[#f0e7dc] pt-3 sm:mt-5 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:pt-4"}`}>
                         <div className="min-w-0">
-                          <p className="text-[10px] text-gray-500 sm:text-xs">
+                          <p className="whitespace-nowrap text-[10px] leading-tight text-gray-500 sm:text-xs">
                             {soldOut ? "Availability" : "Listed price"}
                           </p>
 
@@ -849,7 +857,7 @@ export default function Products() {
                           type="button"
                           onClick={() => addProductToCart(product)}
                           disabled={soldOut || !product.id}
-                          className={`flex w-full shrink-0 items-center justify-center gap-1 rounded-lg px-2 py-2 text-[11px] font-bold transition disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 sm:w-auto sm:gap-2 sm:rounded-xl sm:px-3 sm:py-3 sm:text-sm ${
+                          className={`flex w-full min-w-0 shrink-0 items-center justify-center gap-1 rounded-lg px-1.5 py-2 text-[10px] font-bold transition disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 sm:w-auto sm:gap-2 sm:rounded-xl sm:px-3 sm:py-3 sm:text-sm ${
                             added
                               ? "bg-green-100 text-green-800 hover:bg-green-200"
                               : "bg-[#f8c54d] text-[#35100d] hover:bg-[#edb62d]"
@@ -870,68 +878,14 @@ export default function Products() {
                           )}
                         </button>
                       </div>
+                      </div>
                     </div>
                   </article>
                 );
               })}
             </div>
 
-            {/* Pagination controls */}
-            {totalPages > 1 && (
-              <nav
-                aria-label="Product pagination"
-                className="mt-10 flex flex-wrap items-center justify-center gap-2"
-              >
-                <button
-                  type="button"
-                  onClick={() => goToPage(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="rounded-lg border border-[#eadfce] bg-white px-4 py-2 text-sm font-bold text-[#4a1018] transition hover:bg-[#f8e8cb] disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  Previous
-                </button>
-
-                {Array.from(
-                  { length: totalPages },
-                  (_, index) => index + 1
-                ).map((page) => (
-                  <button
-                    key={page}
-                    type="button"
-                    onClick={() => goToPage(page)}
-                    aria-current={
-                      currentPage === page ? "page" : undefined
-                    }
-                    className={`h-10 min-w-10 rounded-lg px-3 text-sm font-bold transition ${
-                      currentPage === page
-                        ? "bg-[#4a1018] text-white"
-                        : "border border-[#eadfce] bg-white text-[#4a1018] hover:bg-[#f8e8cb]"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-
-                <button
-                  type="button"
-                  onClick={() => goToPage(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="rounded-lg border border-[#eadfce] bg-white px-4 py-2 text-sm font-bold text-[#4a1018] transition hover:bg-[#f8e8cb] disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  Next
-                </button>
-              </nav>
-            )}
-
-            <p className="mt-3 text-center text-sm text-gray-500">
-              Showing{" "}
-              {(currentPage - 1) * PRODUCTS_PER_PAGE + 1}–
-              {Math.min(
-                currentPage * PRODUCTS_PER_PAGE,
-                filteredProducts.length
-              )}{" "}
-              of {filteredProducts.length} products
-            </p>
+            <p className="mt-4 text-center text-sm text-gray-500">Showing all {filteredProducts.length} products</p>
           </>
         ) : (
           <div className="mt-10 rounded-2xl border border-dashed border-[#d8c5ac] bg-white p-12 text-center">
@@ -953,7 +907,6 @@ export default function Products() {
                 setSearchTerm("");
                 setActiveCategory("All Products");
                 setSortBy("featured");
-                setCurrentPage(1);
                 setNotice("");
               }}
               className="mt-5 rounded-xl bg-[#4a1018] px-5 py-3 text-sm font-bold text-white"
