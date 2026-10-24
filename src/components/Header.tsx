@@ -56,7 +56,7 @@ export default function Header() {
 
         {/* Contact */}
         <a
-          href="tel:+918438042315"
+          href="tel:+918438349372"
           className="flex items-center gap-3 text-stone-900"
         >
           <span className="grid h-10 w-10 place-items-center rounded-full bg-amber-100 text-red-800 sm:h-12 sm:w-12">
@@ -69,7 +69,7 @@ export default function Header() {
             </span>
 
             <span className="text-sm font-bold">
-              +91 84380 42315
+              +91 84383 49372
             </span>
           </span>
         </a>

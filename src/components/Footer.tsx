@@ -37,11 +37,11 @@ export default function Footer() {
           </p>
 
           <a
-            href="tel:+918438042315"
+            href="tel:+918438349372"
             className="mb-3 flex items-center gap-3 text-sm text-stone-300 transition hover:text-yellow-300"
           >
             <Phone size={16} />
-            +91 84380 42315
+            +91 84383 49372
           </a>
 
 

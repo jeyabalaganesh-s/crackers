@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 
-const WHATSAPP_NUMBER = "918438042315"; // Replace with your WhatsApp number
+const WHATSAPP_NUMBER = "918438349372"; // Replace with your WhatsApp number
 
 export default function Contact() {
   const [form, setForm] = useState({
@@ -117,7 +117,7 @@ export default function Contact() {
               title="Call Us"
               description="Speak with our team directly."
               detail="Add your business phone"
-              href="tel:+918438042315"
+              href="tel:+918438349372"
               linkText="Call now"
             />
             <ContactCard
